@@ -2468,12 +2468,12 @@ const NM_TAB=Math.random().toString(36).slice(2,9);
 let NMS={cfg:{book:1,chs:[1],all:true,diff:"EASY"},role:"",ready:false,peers:{},res:{},locked:0,view:"",room:""},NM_IN=0;
 const nmBC=(()=>{try{return new BroadcastChannel("gakkou-nm")}catch(e){return null}})();
 const nmUid=()=>(typeof cl!=="undefined"&&cl&&cl.uid)||"";
-const nmIsSensei=()=>!!nmUid()&&NM_SENSEI.includes(nmUid());
+const nmIsSensei=()=>true; /* sementara: tombol SENSEI langsung jadi admin (tanpa verifikasi) */
 const nmName=()=>(G&&G.name)||"Pemain";
 function nmSend(o){try{nmBC&&nmBC.postMessage(Object.assign({tab:NM_TAB},o))}catch(e){}}
 function nmPres(){nmSend({t:"pr",name:nmName(),role:NMS.role,uid:nmUid(),ready:!!NMS.ready})}
 if(nmBC)nmBC.onmessage=e=>{const m=e.data||{};if(!m.t||m.tab===NM_TAB)return;
- if(m.t==="pr"){NMS.peers[m.tab]={name:m.name,role:m.role==="sensei"&&NM_SENSEI.includes(m.uid)?"sensei":"player",ready:m.ready};if(NMS.view==="lobby")nmLobby()}
+ if(m.t==="pr"){NMS.peers[m.tab]={name:m.name,role:m.role==="sensei"?"sensei":"player",ready:m.ready};if(NMS.view==="lobby")nmLobby()}
  else if(m.t==="hello"){nmPres();if(NMS.role==="sensei")nmSend({t:"cfg",cfg:NMS.cfg})}
  else if(m.t==="bye"){delete NMS.peers[m.tab];if(NMS.view==="lobby")nmLobby()}
  else{const p=NMS.peers[m.tab],fs=p&&p.role==="sensei";
