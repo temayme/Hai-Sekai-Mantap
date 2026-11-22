@@ -123,7 +123,7 @@ input,textarea{font-size:16px}
 <script>
 /* ===== MULTIPLAYER WEBSOCKET (aktif otomatis saat dibuka dari server game) ===== */
 (function(){
-if(!window.MN_WS)return;
+if(!window.MN_WS||/github\.io$/i.test(location.hostname)||location.protocol==="file:")return;
 const PID=(()=>{try{let k=localStorage.getItem("mn-pid");if(!k){k=Array.from(crypto.getRandomValues(new Uint8Array(12)),b=>b.toString(16).padStart(2,"0")).join("");localStorage.setItem("mn-pid",k)}return k}catch(e){return Math.random().toString(36).slice(2,12)+Date.now().toString(36)}})();
 const st={ws:null,ok:false,me:"",peers:new Map(),my:{},pend:null,conn:new Set(),pl:new Set(),ev:new Map(),tries:0,t:0,rx:0,fr:0,started:false};
 const mk=(id,by,p)=>({peer:id,by,isMe:id===st.me,sameTab:id===st.me,kind:"viewer",guest:false,presence:p||{},updatedAt:Date.now()});
@@ -188,19 +188,19 @@ function mq(spec,hk){
  m.pub=(t,s)=>{if(m.up)tx(pkt(0x30,[...str(t),...enc.encode(s)]))};
  const parse=()=>{for(;;){const b=m.buf;if(b.length<2)return;let len=0,mul=1,i=1,x;do{if(i>=b.length)return;x=b[i++];len+=(x&127)*mul;mul*=128}while((x&128)&&i<5);if(b.length<i+len)return;
   const type=b[0]>>4,fl=b[0]&15,body=b.subarray(i,i+len);m.buf=b.subarray(i+len);
-  if(type===2){if(body[1]===0){m.up=true;m.tries=0;clearInterval(m.pt);m.pt=setInterval(()=>{tx(Uint8Array.of(0xC0,0));if(Date.now()-m.rx>40000)try{m.ws.close()}catch(e){}},15000);hk.up(m)}else try{m.ws.close()}catch(e){}}
+  if(type===2){if(body[1]===0){m.up=true;m.tries=0;clearInterval(m.pt);m.pt=setInterval(()=>{tx(Uint8Array.of(0xC0,0));if(Date.now()-m.rx>25000)try{m.ws.close()}catch(e){}},10000);m.ack=0;m.lastOk=Date.now();hk.up(m)}else{m.ack=body[1]||255;try{m.ws.close()}catch(e){}}}
   else if(type===3){const tl=body[0]<<8|body[1];let o=2+tl;const t=dec.decode(body.subarray(2,o));if((fl>>1)&3)o+=2;hk.msg(t,dec.decode(body.subarray(o)))}}};
- m.open=()=>{clearTimeout(m.t);if(m.ws||!m.want)return;let ws;m.url=urls[m.ui%urls.length];try{ws=new WebSocket(m.url,"mqtt")}catch(e){m.err="ditolak browser";m.ui++;return m.retry()}
+ m.open=()=>{clearTimeout(m.t);if(m.ws||!m.want)return;let ws;m.url=urls[m.ui%urls.length];m.ack=0;m.tryN=(m.tryN||0)+1;try{ws=new WebSocket(m.url,"mqtt")}catch(e){m.err="ditolak browser";m.ui++;return m.retry()}
   ws.binaryType="arraybuffer";m.ws=ws;m.buf=new Uint8Array(0);clearTimeout(m.ct);m.ct=setTimeout(()=>{if(m.ws===ws&&!m.up)try{ws.close()}catch(e){}},12000);
-  ws.onopen=()=>{m.rx=Date.now();tx(pkt(0x10,[0,4,77,81,84,84,4,spec.user?0xC6:6,0,30,...str("mn-"+ME+rnd(2)),...str(NS+"/l"),...str(ME),...(spec.user?[...str(spec.user),...str(spec.pass||"")]:[])]))};
+  ws.onopen=()=>{m.rx=Date.now();tx(pkt(0x10,[0,4,77,81,84,84,4,spec.user?0xC6:6,0,20,...str("mn-"+ME+rnd(2)),...str(NS+"/l"),...str(ME),...(spec.user?[...str(spec.user),...str(spec.pass||"")]:[])]))};
   ws.onmessage=e=>{m.rx=Date.now();const d=new Uint8Array(e.data),nb=new Uint8Array(m.buf.length+d.length);nb.set(m.buf);nb.set(d,m.buf.length);m.buf=nb;parse()};
-  ws.onclose=ev=>{if(m.ws!==ws)return;m.ws=null;const was=m.up;m.err=(was?"putus":"gagal")+(ev&&ev.code?" "+ev.code:"");if(!was)m.ui++;m.up=false;clearInterval(m.pt);if(was)hk.down(m);m.retry()};
+  ws.onclose=ev=>{if(m.ws!==ws)return;m.ws=null;const was=m.up;m.code=(ev&&ev.code)||0;m.err=(was?"putus":"gagal")+(m.code?" "+m.code:"")+(m.ack?" · CONNACK "+m.ack:"");if(!was)m.ui++;m.up=false;clearInterval(m.pt);if(was)hk.down(m);m.retry()};
   ws.onerror=()=>{try{ws.close()}catch(e){}}};
  m.retry=()=>{if(!m.want)return;m.tries++;clearTimeout(m.t);m.t=setTimeout(m.open,Math.min(8000,600*2**Math.min(m.tries,4))+Math.random()*400)};
  m.now=()=>{if(m.ws&&m.ws.readyState>1){m.ws=null;if(m.up){m.up=false;clearInterval(m.pt);try{hk.down(m)}catch(e){}}}if(!m.ws){clearTimeout(m.t);m.open()}};
  m.stop=()=>{m.want=false;clearTimeout(m.t);try{m.ws&&m.ws.close()}catch(e){}};
  return m}
-const sanitize=p=>{const o={};if(!p||typeof p!=="object"||Array.isArray(p))return o;let n=0;for(const k in p){if(++n>24||!/^[a-z]{1,3}$/.test(k))continue;const v=p[k];if(typeof v==="number"&&isFinite(v))o[k]=Math.round(v*100)/100;else if(typeof v==="string")o[k]=v.slice(0,60)}return o};
+const sanitize=p=>{const o={};if(!p||typeof p!=="object"||Array.isArray(p))return o;let n=0;for(const k in p){if(++n>24||!/^[a-z]{1,3}$/.test(k))continue;const v=p[k];if(typeof v==="number"&&isFinite(v))o[k]=Math.round(v*100)/100;else if(typeof v==="string")o[k]=v.slice(0,k==="nm"?1400:60)}return o};
 const st={ok:false,peers:new Map(),my:{},dirty:false,seq:0,seen:new Map(),cseen:new Map(),conn:new Set(),pl:new Set(),ev:new Map(),zone:"",fr:0,lastHello:0,first:true,gt:0};
 const T=k=>NS+"/"+k,zoneOf=s=>typeof s==="string"&&/^[A-Za-z0-9_]{1,24}$/.test(s)?s:"";
 const hk={up(m){m.sub([T("o/+"),T("h"),T("l"),T("c")].concat(st.zone?[T("z/"+st.zone+"/+")]:[]));recompute();if(st.first){st.first=false}pubAll(T("h"),JSON.stringify({i:ME}));beat()},down(){recompute()},msg:onMsg};
@@ -282,6 +282,7 @@ const hubRoom={
  onConnection(f){hub.cb.add(f);setTimeout(()=>{try{f(connNow())}catch(e){}},0);return()=>hub.cb.delete(f)},
  join:()=>Promise.resolve(hubRoom),leave:()=>Promise.resolve(),
  reconnect(){room.reconnect();if(nat&&typeof nat.reconnect==="function")try{nat.reconnect()}catch(e){}else if(!nat&&NATIVE)NATIVE.use("room").then(r=>{if(r&&!nat)attachNative(r)}).catch(()=>{})}};
+window.MN_DIAG2=()=>({https:SEC,wsLocal:"nonaktif (tidak ada server /ws di GitHub Pages)",native:NATIVE?(nat?(natOk?"ok":"putus"):"menunggu"):"tidak ada",online:connNow(),brokers:all().map(c=>{let h=c.url;try{h=new URL(c.url).host}catch(e){}return{host:h,url:c.url,state:c.up?"ONLINE":(c.ws&&c.ws.readyState===0?"MENYAMBUNG":"OFFLINE"),err:c.err||"",code:c.code||0,ack:c.ack||0,tries:c.tryN||0,okAgo:c.up&&c.lastOk?Math.round((Date.now()-c.lastOk)/1000):null,rxAgo:c.rx?Math.round((Date.now()-c.rx)/1000):null}})});
 window.MN_DIAG=()=>all().map(c=>{let h="?";try{const p=new URL(c.url).hostname.split(".");h=p.length>2?p[p.length-2]:p[0]}catch(e){}return h+" "+(c.up?"ok":(c.err||"menyambung"))}).join(", ")+(NATIVE?", claude.ai "+(nat?(natOk?"ok":"putus"):"tidak ada"):"");
 const hubClaude={__mn:1,use:async n=>{if(n==="room")return hubRoom;if(NATIVE)try{return await NATIVE.use(n)}catch(e){}return null}};
 try{Object.defineProperty(window,"claude",{configurable:true,get:()=>hubClaude,set:v=>{if(v&&typeof v.use==="function"&&!v.__mn){NATIVE=v;tryNat()}}})}catch(e){window.claude=hubClaude}
@@ -2008,7 +2009,7 @@ function drawRem(E,sc,hh,dt){
 
 const NET={r:null,k:"rec",n:1,m:""};
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-function netDraw(){let b=$("nb");if(!b){b=document.createElement("div");b.id="nb";document.body.appendChild(b)}b.className="mps nb "+NET.k;b.textContent=ST[NET.k][0]+" "+ST[NET.k][1]+(NET.k==="on"?" · "+NET.n+" pemain":"");b.style.display=eng&&eng.vp?"none":""}
+function netDraw(){let b=$("nb");if(!b){b=document.createElement("div");b.id="nb";document.body.appendChild(b);b.style.pointerEvents="auto";b.style.cursor="pointer";b.onclick=()=>{try{mnDiagM()}catch(e){}}}b.className="mps nb "+NET.k;b.textContent=ST[NET.k][0]+" "+ST[NET.k][1]+(NET.k==="on"?" · "+NET.n+" pemain":"");b.style.display=eng&&eng.vp?"none":""}
 function netSet(k){NET.k=k;netDraw()}
 async function netInit(){
  netDraw();setInterval(netDraw,1000);
@@ -2313,10 +2314,20 @@ function mkGakkou(){
 const SKA=window.SKA_ASSETS;
 function gkZ(){let Z=RM.a_school;if(!Z){Z=RM.a_school=mkArea("a_school");IMG.a_school=Z.img}return Z}
 const SKMON=[
- {id:"bakeba",n:"Bakeba Oni",img:SKA.bakeba,h:108,sp:null,v:116,vr:380,vc:150,say0:"Merangkak... mendekat..."},
- {id:"kage",n:"Kagekotsu Obake",img:SKA.kage,h:141,sp:null,v:161,vr:480,vc:190,say0:"Tulang... tulang... milikmu..."},
- {id:"pura",n:"PURAHASHIM Oni",img:SKA.purahashim,h:149,sp:null,v:131,vr:405,vc:215,say0:"Dua kepala, satu tujuan: KAMU."}
+ {id:"bakeba",n:"Bakeba Oni",img:SKA.bakeba,h:108,sp:null,v:98,vr:380,vc:150,say0:"Merangkak... mendekat..."},
+ {id:"kage",n:"Kagekotsu Obake",img:SKA.kage,h:141,sp:null,v:128,vr:480,vc:190,say0:"Tulang... tulang... milikmu..."},
+ {id:"pura",n:"PURAHASHIM Oni",img:SKA.purahashim,h:149,sp:null,v:112,vr:405,vc:215,say0:"Dua kepala, satu tujuan: KAMU."}
 ];
+/* area WAJAH tiap Obake (x,y,w,h dalam piksel sprite) — dipakai untuk zoom kamera & jumpscare */
+const SKFACE={bakeba:[48,6,120,122],kage:[6,0,104,92],pura:[50,0,150,95]};
+/* pola gerak: bakeba = merangkak bergelombang, kage = mengintai lalu menerkam, pura = makin lama makin ngotot */
+function skPace(E,o,ch,dt){let m=1;const t=E.t;
+ if(!ch){o.cs=0;o.ph=0;o.pt=0}
+ else if(o.id==="bakeba")m=.8+.35*Math.sin(t*.9+o.t0);
+ else if(o.id==="kage"){o.pt=(o.pt||0)+dt;const ph=o.ph||0,L=[2.4,.9,.7][ph];if(o.pt>=L){o.pt=0;o.ph=(ph+1)%3}m=[.6,1.55,.1][o.ph||0]}
+ else{o.cs=(o.cs||0)+dt;m=(.65+.55*Math.min(1,o.cs/7))*(Math.sin(t*1.7+o.t0)>.88?.3:1)}
+ if(E.nm&&E.nm.buff.mslow)m*=.45;
+ return m}
 let SK=null;
 const skImg=src=>{const i=new Image();i.src=src;return i};
 const skAssets={};
@@ -2389,10 +2400,10 @@ function skTick(E,dt){
  E.fT-=dt;if(E.fT<=0){E.fT=.25;E.fld=skField(E.S,E.x,E.y)}
  for(const o of E.mon){
   const dist=Math.hypot(o.x-E.x,o.y-E.y);
-  const ch=dist<(o.mode==="chase"?o.vr*1.5:o.vr);o.mode=ch?"chase":"patrol";
-  let sp=o.v*(ch?1.12:.62);
+  const hd=!!(E.nm&&E.nm.hide),ch=!hd&&dist<(o.mode==="chase"?o.vr*1.5:o.vr);o.mode=ch?"chase":"patrol";if(!hd)o.ho=0;
+  let sp=o.v*(ch?1.12:.62)*skPace(E,o,ch,dt);
   if(ch)skStep(E.S,o,E.fld,dt,sp);
-  else{if(!o.wp||Math.hypot(o.wp[0]-o.x,o.wp[1]-o.y)<22){let w;for(let k=0;k<40;k++){const c=E.S.g.length*Math.random()|0;if(E.S.g[c]){w=[(c%GW)*CELL+CELL/2,(c/GW|0)*CELL+CELL/2];break}}o.wp=w||[E.M.sp[0],E.M.sp[1]];o.fld=skField(E.S,o.wp[0],o.wp[1])}
+  else{if(!o.wp||Math.hypot(o.wp[0]-o.x,o.wp[1]-o.y)<22||(hd&&!o.ho)){o.ho=hd?1:0;let w;for(let k=0;k<90;k++){const c=E.S.g.length*Math.random()|0;if(E.S.g[c]){const cw=[(c%GW)*CELL+CELL/2,(c/GW|0)*CELL+CELL/2];if(hd&&k<80&&Math.hypot(cw[0]-E.M.safe[0],cw[1]-E.M.safe[1])<700)continue;w=cw;break}}o.wp=w||[E.M.sp[0],E.M.sp[1]];o.fld=skField(E.S,o.wp[0],o.wp[1])}
    skStep(E.S,o,o.fld,dt,sp)}
   o.sT-=dt;
   if(ch&&dist<o.vr&&!o.warn){o.warn=1;skMsg(E,"⚠️ "+o.n+": “"+o.say0+"”",2.2)}if(!ch)o.warn=0;
@@ -2412,16 +2423,20 @@ function skDraw(E){
  const cv=E.cv,dpr=Math.min(2,window.devicePixelRatio||1),W=cv.clientWidth,H=cv.clientHeight;
  if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
  const g=E.cx;g.setTransform(dpr,0,0,dpr,0,0);g.imageSmoothingEnabled=false;g.fillStyle="#000";g.fillRect(0,0,W,H);
- const Z=E.S.Z,bg=skAssets.map,vw=820,sc=W/vw,vh=H/sc;
- let cxw=Math.max(vw/2,Math.min(Z.w-vw/2,E.cam.x)),cyw=Math.max(vh/2,Math.min(Z.h-vh/2,E.cam.y));
- const ox=cxw-vw/2,oy=cyw-vh/2,X=x=>(x-ox)*sc,Y=y=>(y-oy)*sc;
+ const Z=E.S.Z,bg=skAssets.map;
+ /* zoom sinematik: makin dekat Obake, kamera makin mendekat + sedikit gemetar */
+ let zt=1,nd=1e9,nmo=null;if(E.game){for(const o of E.mon){const d=Math.hypot(o.x-E.x,o.y-E.y);if(d<nd){nd=d;nmo=o}}if(E.state==="play"&&nd<520)zt=1+Math.pow(1-nd/520,1.1)*2.4}
+ const dtz=Math.min(.1,Math.max(0,E.t-(E.zT||E.t)));E.zT=E.t;E.zoom=(E.zoom||1)+(zt-(E.zoom||1))*Math.min(1,dtz*(zt>(E.zoom||1)?5:2));E.near=nd;
+ const vw=820/E.zoom,sc=W/vw,vh=H/sc,sh=E.state==="play"&&nd<200?(1-nd/200)*2.5:0;
+ const bk=nmo&&E.state==="play"?Math.min(1,(E.zoom-1)/2.4)*.6:0,fy0=nmo?nmo.y-nmo.h*.78:0;let cxw=Math.max(vw/2,Math.min(Z.w-vw/2,E.cam.x+(nmo?(nmo.x-E.x)*bk:0)+(Math.random()-.5)*sh)),cyw=Math.max(vh/2,Math.min(Z.h-vh/2,E.cam.y+(nmo?(fy0-(E.y-48))*bk:0)+(Math.random()-.5)*sh));
+ const ox=cxw-vw/2,oy=cyw-vh/2,X=x=>(x-ox)*sc,Y=y=>(y-oy)*sc;E.vp_=[ox,oy,sc];
  if(bg.complete&&bg.naturalWidth){const q=bg.naturalWidth/Z.w;g.drawImage(bg,ox*q,oy*q,vw*q,vh*q,0,0,W,H)}
  /* jimat */
  for(const t of E.tl)if(t.on){const b=Math.sin(E.t*4+t.x)*3;g.save();g.shadowColor="#ffd93b";g.shadowBlur=14;g.fillStyle="#f6e3b0";g.fillRect(X(t.x)-10*sc,Y(t.y-34+b),20*sc,36*sc);g.restore();g.fillStyle="#c0275a";g.fillRect(X(t.x)-4*sc,Y(t.y-26+b),8*sc,20*sc)}
  /* entitas urut Y */
  const ents=[];
- ents.push({y:E.y,d:()=>{if(E.inv>0&&Math.floor(E.t*14)%2)return;const im=E.pimg,h=96,w=h*(im.naturalWidth||77)/(im.naturalHeight||150),bob=E.moving?Math.abs(Math.sin(E.t*14))*3:0;
-  g.save();g.translate(X(E.x),Y(E.y-bob));g.scale(E.f,1);g.drawImage(im,-w/2*sc,-h*sc,w*sc,h*sc);g.restore();
+ ents.push({y:E.y,d:()=>{const NB=E.nm&&E.nm.buff,dead=E.nm&&(E.state==="caught"||E.state==="spec");if(E.inv>0&&!(NB&&NB.god)&&Math.floor(E.t*14)%2)return;const im=E.pimg,h=96,w=h*(im.naturalWidth||77)/(im.naturalHeight||150),bob=E.moving?Math.abs(Math.sin(E.t*14))*3:0;
+  g.save();g.translate(X(E.x),Y(E.y-bob));g.scale(E.f,1);if(dead)g.rotate(1.45);else if(NB&&NB.stun)g.rotate(Math.sin(E.t*14)*.14);g.drawImage(im,-w/2*sc,-h*sc,w*sc,h*sc);g.restore();
   if(G.set.n)g.fillStyle="#fff",g.font=`700 ${11}px sans-serif`,g.textAlign="center",g.fillText(G.name,X(E.x),Y(E.y-h)-4)}});
  for(const o of E.mon)ents.push({y:o.y,d:()=>{const im=skAssets[o.id];if(!im.naturalWidth)return;const h=o.h*1.0,w=h*im.naturalWidth/im.naturalHeight,ch=o.mode==="chase",bob=Math.sin(E.t*(ch?10:5)+o.t0)*(ch?3:1.5);
   g.save();g.shadowColor=ch?"#ff1f4b":"#000";g.shadowBlur=ch?18:6;g.translate(X(o.x),Y(o.y)+bob*sc);g.scale(-o.f,1);g.drawImage(im,-w/2*sc,-h*sc,w*sc,h*sc);g.restore();
@@ -2446,6 +2461,7 @@ function skDraw(E){
    if(T){const a=Math.atan2(T.y-E.y,T.x-E.x);g.save();g.translate(px,py);g.rotate(a);g.fillStyle=E.got>=E.need?"rgba(125,216,255,.9)":"rgba(255,217,59,.85)";g.beginPath();g.moveTo(70,0);g.lineTo(54,-8);g.lineTo(54,8);g.fill();g.restore()}}
   if(lf>0){g.fillStyle="rgba(200,215,255,"+Math.min(.35,lf)+")";g.fillRect(0,0,W,H)}
   if(E.flash>0){g.fillStyle="rgba(200,0,30,"+E.flash*.7+")";g.fillRect(0,0,W,H)}
+   if(E.near<320&&E.state==="play"){const a=(1-E.near/320)*.5,gv=g.createRadialGradient(W/2,H/2,Math.min(W,H)*.25,W/2,H/2,Math.max(W,H)*.7);gv.addColorStop(0,"rgba(120,0,20,0)");gv.addColorStop(1,"rgba(120,0,20,"+a+")");g.fillStyle=gv;g.fillRect(0,0,W,H)}
  }
 }
 /* menu: kartu mode 学校 di halaman Dunia */
@@ -2461,47 +2477,100 @@ const _pzGK=prepZ;prepZ=function(id){if(id==="a_school"&&!G.gk1){G.gk1=1;if(G.po
    Tambahan di atas Update 1 + Horror Mode lama (tidak ada yang dihapus). Peta tetap 学校 yang sama.
    Isi UID akun Sensei terverifikasi di NM_SENSEI (UID tampil di layar saat akun ditolak). */
 const NM_SENSEI=[];
-const NMD={EASY:{q:20,m:.85,z:45,w:12,n:4,g:450,ty:0},MEDIUM:{q:15,m:1,z:38,w:10,n:5,g:380,ty:.3},HARD:{q:12,m:1.12,z:30,w:8,n:6,g:320,ty:.6},NIGHTMARE:{q:9,m:1.25,z:24,w:6,n:7,g:260,ty:.85}};
+const NMD={EASY:{q:20,m:.85,z:45,w:12,n:3,g:450,ty:0,tr:0,tt:[]},MEDIUM:{q:15,m:1,z:40,w:10,n:3,g:380,ty:.3,tr:4,tt:["stun","slow","dist"]},HARD:{q:12,m:1.12,z:34,w:8,n:3,g:320,ty:.6,tr:7,tt:["stun","slow","dist","alert"]},NIGHTMARE:{q:9,m:1.25,z:28,w:6,n:3,g:260,ty:.85,tr:10,tt:["stun","slow","dist","alert","drain"]}};
+const NMTR={stun:["💫 JEBAKAN: STUN!",N=>N.buff.stun=N.t+2.5],slow:["🐌 JEBAKAN: JARING LENGKET!",N=>N.buff.slow=N.t+6],dist:["😵 JEBAKAN: KUTUKAN PENGLIHATAN!",N=>N.buff.dist=N.t+5],alert:["📢 JEBAKAN: LONCENG! Obake mendengar!",N=>N.buff.alert=N.t+8],drain:["🪫 JEBAKAN: STAMINA HABIS!",N=>N.stam=0]};
 const NMZ=[["Lapangan",16,6],["Gym",13,19],["Perpustakaan",32,19],["Ruang Guru",57,35],["Ruang Administrasi",51,49],["Ruang Belajar Barat",29,46],["Ruang Belajar Timur",68,46],["Taman Tengah",37,35]];
-const NMI={speed:"⚡",slow:"🐌",shield:"🛡️",clue:"🗺️",det:"👁️",dist:"😵",alert:"📢",stun:"💫"};
+const NMI={god:"✨",mslow:"🧊",speed:"⚡",slow:"🐌",shield:"🛡️",clue:"🗺️",det:"👁️",dist:"😵",alert:"📢",stun:"💫"};
 const NM_TAB=Math.random().toString(36).slice(2,9);
-let NMS={cfg:{book:1,chs:[1],all:true,diff:"EASY"},role:"",ready:false,peers:{},res:{},locked:0,view:"",room:""},NM_IN=0;
-const nmBC=(()=>{try{return new BroadcastChannel("gakkou-nm")}catch(e){return null}})();
+let NMS={cfg:{book:1,chs:[1],all:true,diff:"EASY"},role:"",ready:false,locked:0,view:"",room:"",code:"",sid:"",sidRun:"",res:{},known:{},host:"",st:"WAITING",ts:0,rm:null,unsub:null,hbT:0,pl:[],lv:0,rs:null,starting:0,creating:0,sg:"",bsg:"",zone:"",key:null,vc:new Map(),vp:new Set()},NM_IN=0;
+/* ---- Lobby multiplayer: satu sumber data (presence hub room yang sudah ada), identitas = playerId per sesi tab ---- */
+const nmPid=(()=>{try{let k=sessionStorage.getItem("gk-nm-pid");if(!k){k="P"+Array.from(crypto.getRandomValues(new Uint8Array(8)),b=>b.toString(16).padStart(2,"0")).join("");sessionStorage.setItem("gk-nm-pid",k)}return k.slice(0,11)}catch(e){return("P"+Math.random().toString(36).slice(2,12)).slice(0,11)}})();
+const nmHex=b=>Array.from(new Uint8Array(b),x=>x.toString(16).padStart(2,"0")).join(""),nmInPl=(pl,id)=>{for(let i=0;i<pl.length;i+=11)if(pl.substr(i,11)===id)return true;return false};
 const nmUid=()=>(typeof cl!=="undefined"&&cl&&cl.uid)||"";
 const nmIsSensei=()=>true; /* sementara: tombol SENSEI langsung jadi admin (tanpa verifikasi) */
-const nmName=()=>(G&&G.name)||"Pemain";
-function nmSend(o){try{nmBC&&nmBC.postMessage(Object.assign({tab:NM_TAB},o))}catch(e){}}
-function nmPres(){nmSend({t:"pr",name:nmName(),role:NMS.role,uid:nmUid(),ready:!!NMS.ready})}
-if(nmBC)nmBC.onmessage=e=>{const m=e.data||{};if(!m.t||m.tab===NM_TAB)return;
- if(m.t==="pr"){NMS.peers[m.tab]={name:m.name,role:m.role==="sensei"?"sensei":"player",ready:m.ready};if(NMS.view==="lobby")nmLobby()}
- else if(m.t==="hello"){nmPres();if(NMS.role==="sensei")nmSend({t:"cfg",cfg:NMS.cfg})}
- else if(m.t==="bye"){delete NMS.peers[m.tab];if(NMS.view==="lobby")nmLobby()}
- else{const p=NMS.peers[m.tab],fs=p&&p.role==="sensei";
-  if(m.t==="cfg"&&fs&&NMS.role==="player"&&!NMS.locked){NMS.cfg=m.cfg;if(NMS.view==="lobby")nmLobby()}
-  else if(m.t==="start"&&fs&&NMS.role&&!NMS.locked)nmRun(m.cfg,m.room)
-  else if(m.t==="end"&&fs&&SK&&SK.nm)nmFinish(SK)
-  else if(m.t==="res"){NMS.res[m.tab]={name:String(m.name).slice(0,12),pts:+m.pts||0};if(SK&&SK.nm&&SK.nm.over)nmBoard()}}};
-/* ---- role + lobby ---- */
-function nmEntry(){skStop();NMS.view="role";R(`<button class="back" onclick="goArea('a_school')">← Kembali ke 学校</button><h2>🌙 GAKKOU NIGHT MODE<br><small style="font-size:13px;color:#8a5a7a">OBAKE ESCAPE</small></h2><div class="card" style="min-height:0;padding:16px;gap:10px;align-items:stretch"><button class="pri" onclick="nmRole('sensei')">🎓 SENSEI <small>(Game Master)</small></button><button onclick="nmRole('player')">🧑‍🎓 PLAYER</button><p class="sm">Sensei memilih buku, bab &amp; kesulitan lalu menekan START. Player menekan READY.</p></div>`);hud()}
-function nmRole(r){if(r==="sensei"&&!nmIsSensei()){R(`<button class="back" onclick="nmEntry()">← Kembali</button><h2>🔒 Bukan akun Sensei</h2><div class="card" style="min-height:0;padding:16px;gap:10px;align-items:stretch"><p class="sm">Akun ini belum terverifikasi sebagai Sensei, jadi hak admin tidak diberikan.</p><p class="sm">ID akun: <b>${esc(nmUid()||"(belum login)")}</b></p><button class="pri" onclick="nmRole('player')">Masuk sebagai PLAYER</button></div>`);return}
- NMS.role=r;NMS.ready=false;NMS.peers={};nmPres();nmSend({t:"hello"});nmLobby()}
-function nmLobby(){NMS.view="lobby";const c=NMS.cfg,S=NMS.role==="sensei",lo=c.book===2?26:1,
- ps=Object.values(NMS.peers).filter(p=>p.role!=="sensei").slice(0,55);
- if(NMS.role==="player")ps.unshift({name:nmName()+" (kamu)",ready:NMS.ready});
- const dis=S&&!NMS.locked?"":"disabled",
- chips=Array.from({length:25},(_,i)=>{const n=lo+i,on=c.all||c.chs.includes(n);return `<button ${dis} style="padding:6px 0;${on?"background:#ff2d95;color:#fff":""}" onclick="nmCh(${n})">${n}</button>`}).join("");
+const nmName=()=>((typeof G!=="undefined"&&G&&G.name)||"Pemain").slice(0,12);
+const nmCode=()=>{const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";return Array.from(crypto.getRandomValues(new Uint8Array(5)),b=>c[b%c.length]).join("")};
+const nmZone=c=>"NM"+c;
+const nmList=()=>Object.values(NMS.known).filter(p=>!p.lv).sort((a,b)=>(a.ts||0)-(b.ts||0)||(a.pid<b.pid?-1:1));
+const nmRng=s=>{let h=1779033703;for(const c of s){h=Math.imul(h^c.charCodeAt(0),3432918353);h=h<<13|h>>>19}let a=h>>>0;return()=>{a=a+1831565813|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}};
+function nmMine(){const o={pid:nmPid,role:NMS.role,name:nmName(),rdy:NMS.ready?1:0,ts:NMS.ts,hb:Date.now(),lv:NMS.lv?1:0,rs:NMS.rs||null};if(NMS.role==="sensei"){o.cfg=NMS.cfg;o.st=NMS.st;o.sid=NMS.sid;o.pl=NMS.pl||""}return o}
+function nmPub(){if(!NMS.rm||!NMS.code||!NMS.key)return;const b=JSON.stringify(nmMine()),z=NMS.zone,k=NMS.key;crypto.subtle.sign("HMAC",k,new TextEncoder().encode(b)).then(x=>{if(!NMS.rm||NMS.zone!==z)return;const r=NMS.rm.presence({s:z,n:nmName(),nm:b+"~"+nmHex(x).slice(0,24)});r&&r.catch&&r.catch(()=>{})}).catch(()=>{})}
+/* verifikasi tanda tangan pesan (HMAC dari kunci turunan Room ID) — pesan tak valid diabaikan */
+function nmVerify(raw){if(NMS.vp.has(raw))return;NMS.vp.add(raw);const i=raw.lastIndexOf("~"),b=raw.slice(0,i),sg=raw.slice(i+1),vc=NMS.vc;
+ crypto.subtle.sign("HMAC",NMS.key,new TextEncoder().encode(b)).then(x=>{let n=false;if(i>0&&nmHex(x).slice(0,24)===sg){try{n=JSON.parse(b);if(!n||typeof n.pid!=="string"||n.pid.length>11)n=false}catch(e){n=false}}
+  if(vc!==NMS.vc)return;vc.set(raw,n);NMS.vp.delete(raw);if(vc.size>600){for(const q of vc.keys()){vc.delete(q);if(vc.size<300)break}}nmSync(null)}).catch(()=>{NMS.vp.delete(raw)})}
+function nmSave(){try{sessionStorage.setItem("gk-nm-act",JSON.stringify({code:NMS.code,role:NMS.role,ready:!!NMS.ready}))}catch(e){}}
+async function nmJoin(role,code){
+ if(NMS.unsub){try{NMS.unsub()}catch(e){}NMS.unsub=null}clearInterval(NMS.hbT);
+ let r=null;try{r=await claude.use("room")}catch(e){r=null}
+ if(!r){toast("Offline — tidak tersambung ke server multiplayer. Coba lagi.");return false}
+ if(!(crypto&&crypto.subtle)){toast("Multiplayer aman butuh HTTPS");return false}
+ const te=new TextEncoder(),zh=await crypto.subtle.digest("SHA-256",te.encode("gk-zone|"+code)),kh=await crypto.subtle.digest("SHA-256",te.encode("gk-key|"+code)),hk2=await crypto.subtle.importKey("raw",kh,{name:"HMAC",hash:"SHA-256"},false,["sign"]);
+ let t=0;try{t=+sessionStorage.getItem("gk-nm-ts-"+code)||0;if(!t){t=Date.now();sessionStorage.setItem("gk-nm-ts-"+code,t)}}catch(e){t=Date.now()}
+ Object.assign(NMS,{rm:r,role,code,zone:"NM"+nmHex(zh).slice(0,16),key:hk2,vc:new Map(),vp:new Set(),ready:false,st:"WAITING",sid:"",sidRun:"",ts:t,locked:0,known:{},host:"",pl:"",lv:0,rs:null,res:{},starting:0,sg:"",bsg:""});
+ nmSave();NMS.unsub=r.onPeers(ch=>nmSync(ch.peers||[]),()=>{});nmPub();
+ NMS.hbT=setInterval(()=>{nmPub();nmSync(null)},2000);nmSync(null);return true}
+function nmSync(ps){if(!NMS.rm||!NMS.code||!NMS.key)return;if(!ps){try{ps=NMS.rm.peers()}catch(e){ps=[]}}
+ const z=NMS.zone,now=Date.now(),m=new Map();
+ for(const p of ps){const pr=p&&p.presence,raw=pr&&pr.nm;if(typeof raw!=="string"||pr.s!==z)continue;const n=NMS.vc.get(raw);if(n===undefined){nmVerify(raw);continue}if(!n)continue;const o=m.get(n.pid);if(!o||(n.hb||0)>=(o.hb||0))m.set(n.pid,n)}
+ m.set(nmPid,nmMine());
+ for(const[pid,n]of m){const k=NMS.known[pid]||(NMS.known[pid]={});if(pid!==nmPid&&k.hb&&n.hb<k.hb)continue;if(k.hb!==n.hb||pid===nmPid)k.hbAt=now;Object.assign(k,n,{me:pid===nmPid,seen:now});k.dc=pid!==nmPid&&now-k.hbAt>9000?1:0}
+ for(const pid in NMS.known){const k=NMS.known[pid];if(!m.has(pid)){if(k.lv||now-k.seen>90000){delete NMS.known[pid];continue}k.dc=1}}
+ const L=nmList(),Sn=L.filter(p=>p.role==="sensei"&&!p.dc);NMS.host=Sn.length?Sn[0].pid:"";
+ if(NMS.role==="sensei"&&NMS.creating&&NMS.host&&NMS.host!==nmPid){nmCreate();return} /* Room ID bentrok → buat kode baru */
+ if(NMS.role==="player"&&L.filter(p=>p.role!=="sensei").findIndex(p=>p.pid===nmPid)>=56){toast("Room penuh (maks. 56 pemain)");nmExit();return}
+ for(const p of L)if(p.rs&&p.rs.sid&&p.rs.sid===NMS.sid)NMS.res[p.pid]={name:p.rs.name,pts:p.rs.pts};
+ const H=NMS.known[NMS.host];
+ if(H&&NMS.host!==nmPid){ /* ikuti Host: konfigurasi, status, START, END */
+  if(!NMS.locked&&H.cfg)NMS.cfg=H.cfg;NMS.st=H.st||"WAITING";
+  if((H.st==="STARTING"||H.st==="PLAYING")&&H.sid&&NMS.sidRun!==H.sid&&nmInPl(H.pl||"",nmPid)){
+   NMS.sidRun=H.sid;NMS.sid=H.sid;NMS.pl=H.pl;NMS.locked=1;NMS.cfg=H.cfg;toast("🌙 Game dimulai!");const sid=H.sid,cfg=H.cfg;
+   setTimeout(()=>{if(NMS.sid===sid&&NMS.code)nmRun(cfg,sid)},H.st==="STARTING"?3000:0)}
+  if(H.st==="FINISHED"&&SK&&SK.nm&&!SK.nm.over&&NMS.sid===H.sid)nmFinish(SK)}
+ if(SK&&SK.nm&&SK.nm.over)nmBoard();
+ if(NMS.view==="lobby"){const sg=JSON.stringify([L.map(p=>[p.pid,p.name,p.rdy,p.dc,p.role]),NMS.host,NMS.st,NMS.cfg,NMS.ready,NMS.locked]);if(sg!==NMS.sg){NMS.sg=sg;nmLobby()}}}
+/* ---- layar role + lobby ---- */
+function nmEntry(){skStop();NMS.view="role";R(`<button class="back" onclick="goArea('a_school')">← Kembali ke 学校</button><h2>🌙 GAKKOU NIGHT MODE<br><small style="font-size:13px;color:#8a5a7a">OBAKE ESCAPE</small></h2><div class="card" style="min-height:0;padding:16px;gap:10px;align-items:stretch"><button class="pri" onclick="nmRole('sensei')">🎓 SENSEI <small>(buat lobby)</small></button><button onclick="nmRole('player')">🧑‍🎓 PLAYER <small>(gabung lobby)</small></button><p class="sm">Sensei membuat lobby &amp; membagikan Room ID. Player memasukkan Room ID lalu menekan READY.</p></div>`);hud()}
+async function nmRole(r){if(r==="sensei"){await nmCreate();return}
+ let last="";try{last=sessionStorage.getItem("gk-nm-last")||""}catch(e){}
+ R(`<button class="back" onclick="nmEntry()">← Kembali</button><h2>🧑‍🎓 Gabung Lobby</h2><div class="card" style="min-height:0;padding:16px;gap:10px;align-items:stretch"><label class="sm">Room ID dari Sensei</label><input id="nmcode" maxlength="6" value="${esc(last)}" autocapitalize="characters" autocomplete="off"><button class="pri" onclick="nmDoJoin()">Gabung</button></div>`);hud()}
+async function nmDoJoin(){const c=(($("nmcode")||{}).value||"").trim().toUpperCase();if(!/^[A-Z0-9]{4,6}$/.test(c)){toast("Room ID tidak valid");return}try{sessionStorage.setItem("gk-nm-last",c)}catch(e){}if(await nmJoin("player",c))nmLobby()}
+async function nmCreate(){const code=nmCode();NMS.creating=1;clearTimeout(NMS.ct);NMS.ct=setTimeout(()=>{NMS.creating=0},2500);if(await nmJoin("sensei",code))nmLobby()}
+async function nmResume(a){if(await nmJoin(a.role,a.code)){NMS.ready=!!a.ready;nmPub();nmSave();nmLobby()}}
+function nmLobby(){NMS.view="lobby";const c=NMS.cfg,S=NMS.role==="sensei",me=NMS.host===nmPid,lo=c.book===2?26:1,L=nmList(),on=L.filter(p=>!p.dc),H=NMS.known[NMS.host],
+ dis=S&&me&&!NMS.locked?"":"disabled",
+ chips=Array.from({length:25},(_,i)=>{const n=lo+i,o=c.all||c.chs.includes(n);return `<button ${dis} style="padding:6px 0;${o?"background:#ff2d95;color:#fff":""}" onclick="nmCh(${n})">${n}</button>`}).join(""),
+ ord=[...L.filter(p=>p.pid===NMS.host),...L.filter(p=>p.pid!==NMS.host)],
+ row=(p,i)=>`${i+1}. ${esc(p.name)}${p.me?" (kamu)":""} — ${p.dc?"⚫ DISCONNECTED":p.pid===NMS.host?"👑 HOST":p.role==="sensei"?"🎓 SENSEI":p.rdy?"🟢 READY":"🟡 NOT READY"}`;
  R(`<button class="back" onclick="nmExit()">← Keluar</button><h2>🌙 ${S?"GAKKOU GAME MASTER":"RUANG TUNGGU"}</h2><div class="card" style="min-height:0;padding:14px;gap:8px;align-items:stretch">
+ <div class="row" style="align-items:center"><b>🔑 Room ID: <span style="letter-spacing:.2em">${esc(NMS.code)}</span></b><button style="padding:6px 10px;flex:none" onclick="nmCopy()">📋 Salin</button></div>
+ <button style="padding:6px 10px;font-size:12px;align-self:flex-start" onclick="mnDiagM()">📡 Diagnostik koneksi</button><small>Status: <b>${NMS.st}</b>${H?"":" · ⚠️ Sensei belum terdeteksi"}</small>
  <b>📚 Buku</b><div class="row"><button ${dis} style="${c.book===1?"background:#ffd93b":""}" onclick="nmSet('book',1)">Minna I (1–25)</button><button ${dis} style="${c.book===2?"background:#ffd93b":""}" onclick="nmSet('book',2)">Minna II (26–50)</button></div>
  <b>📖 Bab</b><button ${dis} style="${c.all?"background:#ffd93b":""}" onclick="nmSet('all',1)">ALL CHAPTERS</button><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px">${chips}</div>
  <b>🎚️ Kesulitan</b><div class="row">${Object.keys(NMD).map(k=>`<button ${dis} style="padding:8px 4px;${c.diff===k?"background:#ffd93b":""}" onclick="nmSet('diff','${k}')">${k}</button>`).join("")}</div>
- <b>👥 Pemain (${ps.length})</b><div class="sm">${ps.map(p=>(p.ready?"✅ ":"⏳ ")+esc(p.name)).join("<br>")||"Belum ada pemain"}</div>
- ${S?`<button class="pri" ${NMS.locked?"disabled":""} onclick="nmStart()">▶ START GAME</button>`:`<button class="pri" onclick="nmReady()">${NMS.ready?"✅ READY":"READY"}</button><p class="sm">Menunggu Sensei menekan START… Pengaturan hanya bisa diubah Sensei.</p>`}</div>`);hud()}
-function nmSet(k,v){if(NMS.locked||NMS.role!=="sensei"||!nmIsSensei())return;const c=NMS.cfg;
- if(k==="book"){c.book=v;c.chs=[v===2?26:1];c.all=true}else if(k==="all")c.all=true;else c[k]=v;nmSend({t:"cfg",cfg:c});nmLobby()}
-function nmCh(n){if(NMS.locked||NMS.role!=="sensei"||!nmIsSensei())return;const c=NMS.cfg;if(c.all){c.all=false;c.chs=[n]}else{const i=c.chs.indexOf(n);i<0?c.chs.push(n):c.chs.splice(i,1);if(!c.chs.length)c.all=true}nmSend({t:"cfg",cfg:c});nmLobby()}
-function nmReady(){NMS.ready=!NMS.ready;nmPres();nmLobby()}
-function nmExit(){nmSend({t:"bye"});NMS.role="";NMS.view="";NMS.ready=false;NMS.peers={};NMS.locked=0;goArea("a_school")}
-function nmStart(){if(NMS.role!=="sensei"||!nmIsSensei()||NMS.locked)return;const room=Date.now().toString(36)+nmUid().slice(0,4),cfg=JSON.parse(JSON.stringify(NMS.cfg));nmSend({t:"start",cfg,room});nmRun(cfg,room)}
+ <b>👥 PEMAIN (${on.length}/56)</b><div class="sm" style="line-height:1.9">${ord.map(row).join("<br>")||"Belum ada pemain"}</div>
+ ${S&&me?`<button class="pri" ${NMS.locked?"disabled":""} onclick="nmStart()">▶ START GAME</button>`:S?`<p class="sm">Hanya Sensei Host yang bisa START.</p>`:`<button class="pri" ${NMS.locked?"disabled":""} onclick="nmReady()">${NMS.ready?"🟢 READY (tekan untuk batal)":"🟡 NOT READY — tekan READY"}</button><p class="sm">${NMS.st==="WAITING"?"Menunggu Sensei menekan START…":NMS.st==="STARTING"?"Game segera dimulai…":"Game sedang berlangsung."}</p>`}</div>`);hud()}
+function nmCopy(){try{navigator.clipboard.writeText(NMS.code);toast("Room ID disalin")}catch(e){toast("Room ID: "+NMS.code)}}
+function nmSet(k,v){if(NMS.locked||NMS.role!=="sensei"||NMS.host!==nmPid)return;const c=NMS.cfg;
+ if(k==="book"){c.book=v;c.chs=[v===2?26:1];c.all=true}else if(k==="all")c.all=true;else c[k]=v;nmPub();nmSync(null);nmLobby()}
+function nmCh(n){if(NMS.locked||NMS.role!=="sensei"||NMS.host!==nmPid)return;const c=NMS.cfg;if(c.all){c.all=false;c.chs=[n]}else{const i=c.chs.indexOf(n);i<0?c.chs.push(n):c.chs.splice(i,1);if(!c.chs.length)c.all=true}nmPub();nmSync(null);nmLobby()}
+function nmReady(){if(NMS.locked||NMS.role!=="player")return;NMS.ready=!NMS.ready;nmSave();nmPub();nmSync(null);nmLobby()}
+function nmExit(){nmScareOff();const r=NMS.rm;NMS.lv=1;nmPub();clearInterval(NMS.hbT);clearTimeout(NMS.ct);if(NMS.unsub){try{NMS.unsub()}catch(e){}}
+ try{sessionStorage.removeItem("gk-nm-act")}catch(e){}
+ setTimeout(()=>{try{r&&r.presence({nm:null,s:null})}catch(e){}},500);
+ Object.assign(NMS,{role:"",code:"",view:"",ready:false,locked:0,known:{},host:"",unsub:null,rm:null,sid:"",sidRun:"",st:"WAITING",pl:"",starting:0,creating:0,rs:null,res:{},lv:0,key:null,zone:""});goArea("a_school")}
+function nmStart(force){if(NMS.role!=="sensei"||NMS.host!==nmPid||NMS.locked||NMS.starting)return;
+ const pls=nmList().filter(p=>p.role!=="sensei"&&!p.dc),rd=pls.filter(p=>p.rdy);
+ if(pls.length&&!rd.length){toast("Belum ada Player yang READY");return}
+ if(!pls.length)toast("Mode latihan solo (belum ada Player)");
+ if(pls.length>rd.length&&!force){modal(`<h3>⚠️ ${pls.length-rd.length} Player belum READY</h3><p class="sm">${pls.filter(p=>!p.rdy).map(p=>esc(p.name)).join(", ")}</p><p class="sm">Yang belum READY tidak ikut bermain.</p><div class="row"><button onclick="closeM()">Tunggu</button><button class="pri" onclick="closeM();nmStart(1)">Mulai sekarang</button></div>`);return}
+ NMS.starting=1;NMS.locked=1;const sid="S"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+ NMS.sid=sid;NMS.sidRun=sid;NMS.st="STARTING";NMS.pl=[nmPid,...rd.map(p=>p.pid)].join("");NMS.cfg=JSON.parse(JSON.stringify(NMS.cfg));
+ nmPub();nmLobby();toast("🌙 Game dimulai dalam 3 detik…");
+ setTimeout(()=>{if(NMS.sid!==sid||!NMS.code)return;NMS.st="PLAYING";nmPub();nmRun(NMS.cfg,sid)},3000)}
+function nmBack(){nmScareOff();NMS.locked=0;NMS.ready=false;NMS.rs=null;NMS.bsg="";skStop();if(NMS.role==="sensei"){NMS.st="WAITING";NMS.sid="";NMS.pl="";NMS.starting=0}nmSave();nmPub();nmSync(null);nmLobby()}
+addEventListener("pagehide",()=>{if(NMS.code){NMS.lv=1;nmPub()}});
+const nmBack2=()=>{if(!document.hidden&&NMS.code){NMS.lv=0;nmPub();nmSync(null)}};addEventListener("pageshow",nmBack2);document.addEventListener("visibilitychange",nmBack2);
 /* ---- soal ---- */
 const NM_R=Object.fromEntries("あa いi うu えe おo かka きki くku けke こko さsa しshi すsu せse そso たta ちchi つtsu てte とto なna にni ぬnu ねne のno はha ひhi ふfu へhe ほho まma みmi むmu めme もmo やya ゆyu よyo らra りri るru れre ろro わwa をo んn がga ぎgi ぐgu げge ごgo ざza じji ずzu ぜze ぞzo だda ぢji づzu でde どdo ばba びbi ぶbu べbe ぼbo ぱpa ぴpi ぷpu ぺpe ぽpo ぁa ぃi ぅu ぇe ぉo".split(" ").map(s=>[s[0],s.slice(1)]));
 function nmK2R(s){let o="",sm=0;for(const c of s){if(c==="っ"){sm=1;continue}if("ゃゅょ".includes(c)){const y={ゃ:"a",ゅ:"u",ょ:"o"}[c];o=/(sh|ch|j)i$/.test(o)?o.slice(0,-1)+y:o.slice(0,-1)+"y"+y;continue}let r=NM_R[c];if(r===undefined)r=c==="ー"?"":c;if(sm&&r){r=(r[0]==="c"?"t":r[0])+r;sm=0}o+=r}return o}
@@ -2519,47 +2588,52 @@ function nmAsk(E){const N=E.nm,P=N.pool,w=P[Math.random()*P.length|0];let cat=["
  $("skst").appendChild(bx);
  if(ty){const i=$("nmqi");i.addEventListener("keydown",e=>{e.stopPropagation();if(e.key==="Enter")nmAnswer(E,i.value)});$("nmqb").onclick=()=>nmAnswer(E,i.value)}
  else bx.querySelectorAll("button").forEach(b=>b.onclick=()=>nmAnswer(E,N.q.opts[+b.dataset.i]))}
-function nmPop(t,c){const e=document.createElement("div");e.textContent=t;e.style.cssText="position:absolute;left:0;right:0;top:38%;text-align:center;z-index:6;font-weight:900;font-size:22px;pointer-events:none;color:"+c+";text-shadow:0 2px 4px #000";$("skst").appendChild(e);e.animate([{transform:"scale(.6)",opacity:0},{transform:"scale(1.1)",opacity:1,offset:.3},{transform:"scale(1)",opacity:0}],{duration:1500}).onfinish=()=>e.remove()}
+function nmPop(t,c){const e=document.createElement("div");e.textContent=t;e.style.cssText="position:absolute;left:0;right:0;top:38%;white-space:pre-line;text-align:center;z-index:6;font-weight:900;font-size:22px;pointer-events:none;color:"+c+";text-shadow:0 2px 4px #000";$("skst").appendChild(e);e.animate([{transform:"scale(.6)",opacity:0},{transform:"scale(1.1)",opacity:1,offset:.3},{transform:"scale(1)",opacity:0}],{duration:1500}).onfinish=()=>e.remove()}
 function nmAnswer(E,v,to){const N=E.nm,q=N.q;if(!q)return;const ok=!to&&(q.opts?v===q.ans:nmEq(v,q.acc));N.q=null;const b=$("nmq");if(b)b.remove();N.acc=0;N.qc=5;
- if(ok){N.ok++;N.pts+=50;const L=[["⚡ SPEED BOOST (8s)",()=>N.buff.speed=N.t+8],["🔋 STAMINA RECOVERY",()=>N.stam=100],["🛡️ SHIELD (60s)",()=>N.buff.shield=N.t+60],["⏱️ EXTRA TIME +8s",()=>N.zone.t+=8],["🗺️ SAFE ZONE CLUE (20s)",()=>N.buff.clue=N.t+20],["👁️ OBAKE DETECTOR (10s)",()=>N.buff.det=N.t+10],["⭐ BONUS +50",()=>N.pts+=50]],r=L[Math.random()*L.length|0];r[1]();nmPop("✅ BENAR! "+r[0],"#7dffa8");try{snd(880)}catch(e){}}
+ if(ok){N.ok++;N.pts+=50;N.buff.speed=N.t+15;N.buff.god=N.t+15;N.buff.mslow=N.t+15;N.stam=100;delete N.buff.slow;delete N.buff.stun;delete N.buff.dist;nmPop("✅ BENAR!\n⚡ SPEED x2 · ✨ KEBAL · 🧊 OBAKE LAMBAT\n(15 detik)","#7dffa8");try{snd(880)}catch(e){}}
  else{N.bad++;N.pts-=10;const L=[["🐌 SLOW RUN (6s)",()=>N.buff.slow=N.t+6],["🪫 STAMINA DRAIN",()=>N.stam=Math.max(0,N.stam-60)],["😵 SCREEN DISTORTION (5s)",()=>N.buff.dist=N.t+5],["📢 OBAKE ALERT (6s)",()=>N.buff.alert=N.t+6],["💫 STUN (2.5s)",()=>N.buff.stun=N.t+2.5]],r=L[Math.random()*L.length|0];r[1]();nmPop((to?"⏰ WAKTU HABIS! ":"❌ SALAH! ")+r[0]+(to||!q.opts?"":"\nJawaban: "+q.ans),"#ff7a90");try{snd(160)}catch(e){}}}
 /* ---- inti game (memakai engine Horror Mode + peta 学校 yang sama) ---- */
-function nmRun(cfg,room){NMS.locked=1;NMS.room=room;NMS.res={};NMS.cfg=cfg;skStop();skPlay("game");const E=SK;if(!E){NMS.locked=0;return}
+function nmRun(cfg,room){NMS.locked=1;NMS.view="game";NMS.room=room;NMS.sid=room;NMS.res={};NMS.rs=null;NMS.bsg="";NMS.cfg=cfg;skStop();skPlay("game");const E=SK;if(!E){NMS.locked=0;return}
  const d=NMD[cfg.diff]||NMD.EASY,f=skField(E.S,E.M.sp[0],E.M.sp[1]);
  let cands=NMZ.map(([n,i,j])=>({n,x:(i+.5)*GKU,y:(j+.5)*GKU})).filter(c=>{const k=(c.y/CELL|0)*GW+(c.x/CELL|0);return E.S.g[k]&&f[k]>=0});if(cands.length<2)cands=[{n:"Lapangan",x:E.M.safe[0],y:E.M.safe[1]},{n:"Spawn",x:E.M.sp[0],y:E.M.sp[1]}];
  const N=E.nm={cfg,d,pool:nmPool(cfg),t:0,cd:4,stam:100,run:0,tired:0,buff:{},pts:0,ok:0,bad:0,reached:0,caught:0,cycle:0,got:0,acc:0,qc:6,q:null,cands,
   zone:{phase:"open",t:d.z}};
- const pick=ex=>{const c=cands.filter(x=>!ex.includes(x));return c[Math.random()*c.length|0]||cands[0]};
+ const rng=nmRng(room),pick=ex=>{const c=cands.filter(x=>!ex.includes(x));return c[rng()*c.length|0]||cands[0]};
+ N.traps=[];for(let k=0;k<4000&&N.traps.length<d.tr;k++){const c=rng()*E.S.g.length|0;if(!E.S.g[c]||f[c]<0)continue;const x=(c%GW)*CELL+CELL/2,y=(c/GW|0)*CELL+CELL/2;
+  if(Math.hypot(x-E.M.sp[0],y-E.M.sp[1])<320||cands.some(q=>Math.hypot(q.x-x,q.y-y)<130)||N.traps.some(q=>Math.hypot(q.x-x,q.y-y)<150))continue;N.traps.push({x,y,on:1,k:d.tt[rng()*d.tt.length|0]})}
  N.pick=pick;N.zone.cur=pick([]);N.zone.nxt=pick([N.zone.cur]);N.zone.prev=null;E.M.safe=[N.zone.cur.x,N.zone.cur.y];
  E.tl=[];E.need=1;E.hp=1;E.state="cd";E.mon.forEach(o=>{o.v*=d.m});
  Object.defineProperty(E,"got",{get(){return NM_IN?0:(N.zone.phase==="open"&&E.state==="play"?1:0)},set(){}});
  const st=$("skst");st.insertAdjacentHTML("beforeend",'<div id="nmov" style="position:absolute;inset:0;z-index:5;display:none;align-items:center;justify-content:center;text-align:center;color:#fff;font-weight:900;font-size:20px;background:rgba(0,0,20,.45);padding:12px;pointer-events:none"></div>');
  const ac=document.querySelector(".acts");if(ac){ac.insertAdjacentHTML("afterbegin",'<button id="nmrun" style="touch-action:none;user-select:none;-webkit-user-select:none">🏃 RUN</button>'+(NMS.role==="sensei"?'<button id="nmend">⛔ END GAME</button>':""));
-  const r=$("nmrun");r.onpointerdown=()=>{N.run=1};r.onpointerup=r.onpointercancel=r.onpointerleave=()=>{N.run=0};const en=$("nmend");if(en)en.onclick=()=>{nmSend({t:"end"});nmFinish(E)}}
+  const r=$("nmrun");r.onpointerdown=()=>{N.run=1};r.onpointerup=r.onpointercancel=r.onpointerleave=()=>{N.run=0};const en=$("nmend");if(en)en.onclick=()=>{if(NMS.host===nmPid){NMS.st="FINISHED";nmPub()}nmFinish(E)}}
  $("skmsg").textContent="";E.sayT=0}
 const _skT=skTick;skTick=function(E,dt){if(E.nm)nmTick(E,dt);else _skT(E,dt)};
 const _skM=skMsg;skMsg=function(E,t,s){if(E&&E.nm&&/Portal terkunci|Jimat/.test(t))return;_skM(E,t,s)};
-const _skL=skLose;skLose=function(E,o){if(E.nm)nmCaught(E,o);else _skL(E,o)};
+const _skL=skLose;skLose=function(E,o){if(E.nm)nmCaught(E,o);else{nmScare(E,o);_skL(E,o)}};
 function nmTick(E,dt){const N=E.nm,d=N.d,z=N.zone,b=N.buff;if(N.over){_skT(E,dt);return}
  N.t+=dt;for(const k in b)if(b[k]<=N.t)delete b[k];
- E.cv.style.filter=b.dist?"hue-rotate(80deg) blur(1.3px) contrast(1.5)":"";
- for(const o of E.mon){if(o.vr0==null)o.vr0=o.vr;o.vr=o.vr0*(b.alert?3:1)}
+ E.cv.style.filter=b.dist?"hue-rotate(80deg) blur(1.3px) contrast(1.5)":b.stun?"grayscale(.8) blur(1px)":"";
+ for(const o of E.mon){if(o.vr0==null)o.vr0=o.vr;o.vr=o.vr0*(b.alert?3:1)*(z.phase==="warn"?1.5:1)}
  const S0=E.state;
  if(S0==="cd"){N.cd-=dt;if(N.cd<=0){E.state="play";skMsg(E,"🌙 Obake bangun! Cari SAFE ZONE!",3)}}
  else{
   if(S0==="caught"){N.rez-=dt;if(N.rez<=0)nmRevive(E)}
   z.t-=dt;
-  if(z.phase==="open"&&z.t<=0){z.phase="warn";z.t=d.w;skMsg(E,"⚠️ Safe Zone berpindah ke "+z.nxt.n+"!",4)}
-  else if(z.phase==="warn"&&z.t<=0){N.cycle++;if(N.cycle>=d.n){nmFinish(E);return}z.prev=z.cur;z.cur=z.nxt;z.nxt=N.pick([z.cur,z.prev]);E.M.safe=[z.cur.x,z.cur.y];z.phase="open";z.t=d.z;N.got=0;skMsg(E,"🟢 Safe Zone baru: "+z.cur.n,3)}}
+  if(z.phase==="open"&&z.t<=0){z.phase="warn";z.t=d.w;skMsg(E,"⚠️ Safe Zone ditutup! Pindah ke "+z.nxt.n+" — Obake mulai mengejar!",4)}
+  else if(z.phase==="warn"&&z.t<=0){N.cycle++;if(N.cycle>=d.n){nmFinish(E);return}z.prev=z.cur;z.cur=z.nxt;z.nxt=N.pick([z.cur,z.prev]);E.M.safe=[z.cur.x,z.cur.y];z.phase="open";z.t=d.z;N.got=0;if(N.traps)N.traps.forEach(t=>t.on=1);skMsg(E,"🟢 Safe Zone "+(N.cycle+1)+"/"+d.n+": "+z.cur.n+" — Obake kembali memburu!",3.5)}}
  const inZ=z.phase==="open"&&E.state==="play"&&Math.hypot(E.M.safe[0]-E.x,E.M.safe[1]-E.y)<58;
- if(inZ){E.inv=Math.max(E.inv,.3);N.stam=Math.min(100,N.stam+20*dt);if(!N.got){N.got=1;N.reached++;const bn=100+Math.round(z.t*2);N.pts+=bn;skMsg(E,"🛡️ SAFE ZONE tercapai! +"+bn,2.5)}}
+ N.hide=inZ;
+ if(inZ){E.inv=Math.max(E.inv,.3);N.stam=Math.min(100,N.stam+20*dt);if(!N.got){N.got=1;N.reached++;const bn=100+Math.round(z.t*2);N.pts+=bn;skMsg(E,"🛡️ SAFE ZONE tercapai! +"+bn+" · Obake pergi, tunggu zona berpindah",3.5)}}
  const K=E.keys,dx0=E.vx+(K.arrowright||K.d?1:0)-(K.arrowleft||K.a?1:0),dy0=E.vy+(K.arrowdown||K.s?1:0)-(K.arrowup||K.w?1:0),m0=Math.hypot(dx0,dy0),mov=m0>.2&&E.state==="play"&&!b.stun,wr=(N.run||K.shift)&&mov&&!N.tired;
- if(wr){N.stam-=26*dt;if(N.stam<=0){N.stam=0;N.tired=1}}else{N.stam=Math.min(100,N.stam+(mov?9:18)*dt);if(N.tired&&N.stam>25)N.tired=0}
- let mult=wr?1.28:.78;if(b.speed)mult*=1.3;if(b.slow)mult*=.6;
+ if(b.god)E.inv=Math.max(E.inv,.3);
+ if(wr&&!b.speed){N.stam-=26*dt;if(N.stam<=0){N.stam=0;N.tired=1}}else{N.stam=Math.min(100,N.stam+(mov||wr?9:18)*dt);if(N.tired&&N.stam>25)N.tired=0}
+ let mult=wr?1.28:.78;if(b.speed)mult*=2;if(b.slow)mult*=.6;
  const sv=[E.vx,E.vy,E.keys],px=E.x,py=E.y;if(b.stun){E.vx=E.vy=0;E.keys={}}
  NM_IN=1;_skT(E,dt);NM_IN=0;E.vx=sv[0];E.vy=sv[1];E.keys=sv[2];
- if(E.state==="play"&&mov){const f=(mult-1)*190*dt/Math.max(1,m0),vx=dx0*f,vy=dy0*f;if(skOk(E.S,E.x+vx,E.y+vy,7)){E.x+=vx;E.y+=vy}else if(skOk(E.S,E.x+vx,E.y,7))E.x+=vx;else if(skOk(E.S,E.x,E.y+vy,7))E.y+=vy}
+ if(E.state==="play"&&mov){const f=(mult-1)*190*dt/Math.max(1,m0),n=Math.max(1,Math.ceil(Math.hypot(dx0*f,dy0*f)/8)),vx=dx0*f/n,vy=dy0*f/n;for(let i=0;i<n;i++){if(skOk(E.S,E.x+vx,E.y+vy,7)){E.x+=vx;E.y+=vy}else if(skOk(E.S,E.x+vx,E.y,7))E.x+=vx;else if(skOk(E.S,E.x,E.y+vy,7))E.y+=vy;else break}}
  N.acc+=Math.hypot(E.x-px,E.y-py);
+ if(E.state==="play"&&N.traps&&!b.god)for(const t of N.traps)if(t.on&&Math.hypot(t.x-E.x,t.y-E.y)<24){t.on=0;const T=NMTR[t.k];T[1](N);N.pts-=5;nmPop(T[0],"#ffb347");try{snd(140)}catch(e){}N.hurtT=N.t+.8}
  if(E.state==="play"){if(!N.q){N.qc-=dt;if(N.acc>d.g&&N.qc<=0)nmAsk(E)}else{N.q.t-=dt;const s=$("nmqt");if(s)s.textContent=Math.max(0,Math.ceil(N.q.t));if(N.q.t<=0)nmAnswer(E,null,1)}}
  nmHud(E)}
 function nmHud(E){const h=$("skhud");if(!h)return;const N=E.nm,z=N.zone,b=N.buff,ar=a=>["➡️","↘️","⬇️","↙️","⬅️","↖️","⬆️","↗️"][(Math.round(a/(Math.PI/4))%8+8)%8];
@@ -2568,23 +2642,62 @@ function nmHud(E){const h=$("skhud");if(!h)return;const N=E.nm,z=N.zone,b=N.buff
  const mo=E.mon.slice().sort((p,q)=>Math.hypot(p.x-E.x,p.y-E.y)-Math.hypot(q.x-E.x,q.y-E.y))[0],md=Math.hypot(mo.x-E.x,mo.y-E.y);
  if(b.det)zt+=`<br>👁️ Obake ${ar(Math.atan2(mo.y-E.y,mo.x-E.x))} ${Math.round(md/GKU)}m`;
  if(md<230)zt+="<br>😱 OBAKE DEKAT!";
- h.innerHTML=`<span>${zt}<br>Siklus ${Math.min(N.cycle+1,N.d.n)}/${N.d.n} · ⭐${Math.round(N.pts)} ✅${N.ok} ❌${N.bad}</span><span style="text-align:right">🏃 ${N.tired?"LELAH":""}<i style="display:block;width:90px;height:8px;background:#333;border:1px solid #fff;margin-left:auto"><u style="display:block;height:100%;width:${N.stam}%;background:${N.stam<25?"#ff4d6d":"#7dffa8"}"></u></i>${Object.keys(b).map(k=>NMI[k]).join(" ")}</span>`;
- const ov=$("nmov");if(ov){const s=E.state;ov.style.display=s==="cd"||s==="caught"||s==="spec"?"flex":"none";ov.innerHTML=s==="cd"?`🌙 Malam tiba…<br>${Math.max(1,Math.ceil(N.cd))}`:s==="caught"?`😱 CAUGHT!<br><small>Diselamatkan dalam ${Math.ceil(N.rez)}s</small>`:s==="spec"?"👻 SPECTATOR<br><small>Menunggu permainan selesai</small>":""}}
+ h.innerHTML=`<span>${zt}<br>Safe Zone ${Math.min(N.cycle+1,N.d.n)}/${N.d.n}${N.d.tr?" · 🪤"+N.d.tr:""} · ⭐${Math.round(N.pts)} ✅${N.ok} ❌${N.bad}</span><span style="text-align:right">🏃 ${N.tired?"LELAH":""}<i style="display:block;width:90px;height:8px;background:#333;border:1px solid #fff;margin-left:auto"><u style="display:block;height:100%;width:${N.stam}%;background:${N.stam<25?"#ff4d6d":"#7dffa8"}"></u></i>${Object.keys(b).map(k=>NMI[k]+(k==="speed"||k==="god"||k==="mslow"?Math.ceil(b[k]-N.t):"")).join(" ")}</span>`;
+ const ov=$("nmov");if(ov){const s=E.state;ov.style.display=s==="cd"||s==="caught"||s==="spec"?"flex":"none";ov.style.background=s==="caught"?"linear-gradient(rgba(90,0,10,.8),rgba(25,0,5,.85))":"rgba(0,0,20,.45)";ov.style.boxShadow=s==="caught"?"inset 0 0 90px 30px #8a0010":"none";ov.innerHTML=s==="cd"?`🌙 Malam tiba…<br>${Math.max(1,Math.ceil(N.cd))}`:s==="caught"?`😱 CAUGHT!<br><small>Diselamatkan dalam ${Math.ceil(N.rez)}s</small>`:s==="spec"?"👻 SPECTATOR<br><small>Menunggu permainan selesai</small>":""}}
 function nmCaught(E,o){const N=E.nm;if(N.over)return;
- if(N.buff.shield){delete N.buff.shield;E.hp=1;E.inv=2.5;skMsg(E,"🛡️ SHIELD menahan serangan "+o.n+"!",2);return}
- N.q=null;const q=$("nmq");if(q)q.remove();N.caught++;E.hp=1;try{snd(120)}catch(e){}
- if(N.caught>=2)E.state="spec";else{E.state="caught";N.rez=12}}
-function nmRevive(E){const N=E.nm;E.state="play";E.hp=1;E.inv=3;N.pts-=40;E.x=E.M.sp[0];E.y=E.M.sp[1];skMsg(E,"💚 Kamu diselamatkan! (−40 poin)",2.5)}
-function nmFinish(E){const N=E.nm;if(N.over)return;N.over=1;NMS.locked=0;E.state="over";E.cv.style.filter="";const q=$("nmq");if(q)q.remove();const ov=$("nmov");if(ov)ov.style.display="none";
- N.pts+=Math.floor(N.t);const sc=Math.max(0,Math.round(N.pts));NMS.res[NM_TAB]={name:nmName(),pts:sc};nmSend({t:"res",name:nmName(),pts:sc});nmBoard();setTimeout(()=>{if(SK===E)nmBoard(1)},3000)}
-function nmBoard(fin){const E=SK;if(!E||!E.nm)return;const N=E.nm,L=Object.entries(NMS.res).map(([k,v])=>({k,...v})).sort((a,b)=>b.pts-a.pts),me=L.findIndex(x=>x.k===NM_TAB),coin=[500,300,200];
+ if(N.buff.god){E.hp=1;E.inv=Math.max(E.inv,.5);return}
+ if(N.buff.shield){delete N.buff.shield;E.hp=1;E.inv=2.5;N.hurtT=N.t+1.2;skMsg(E,"🛡️ SHIELD menahan serangan "+o.n+"!",2);return}
+ N.q=null;const q=$("nmq");if(q)q.remove();N.caught++;E.hp=1;
+ N.bl=Array.from({length:16},()=>({x:Math.random(),y:Math.random(),r:6+Math.random()*26,d:20+Math.random()*70}));
+ if(N.caught>=2)E.state="spec";else{E.state="caught";N.rez=14}
+ nmScare(E,o)}
+function nmRevive(E){const N=E.nm;E.state="play";E.hp=1;E.inv=3;N.bl=null;E.cv.style.transform="";N.pts-=40;E.x=E.M.sp[0];E.y=E.M.sp[1];skMsg(E,"💚 Kamu diselamatkan! (−40 poin)",2.5)}
+function nmFinish(E){const N=E.nm;if(N.over)return;N.over=1;NMS.locked=0;E.state="over";E.cv.style.filter="";E.cv.style.transform="";nmScareOff();const q=$("nmq");if(q)q.remove();const ov=$("nmov");if(ov)ov.style.display="none";
+ N.pts+=Math.floor(N.t);const sc=Math.max(0,Math.round(N.pts));NMS.res[nmPid]={name:nmName(),pts:sc};NMS.rs={sid:NMS.sid,pts:sc,name:nmName()};if(NMS.role==="sensei"&&NMS.host===nmPid)NMS.st="FINISHED";nmPub();nmBoard();setTimeout(()=>{if(SK===E)nmBoard(1)},3000)}
+function nmBoard(fin){const E=SK;if(!E||!E.nm)return;const N=E.nm,L=Object.entries(NMS.res).map(([k,v])=>({k,...v})).sort((a,b)=>b.pts-a.pts),me=L.findIndex(x=>x.k===nmPid),coin=[500,300,200];const sg=JSON.stringify(L)+(fin?1:0);if(NMS.bsg===sg)return;NMS.bsg=sg;
  if(fin&&L.length>=3&&me>=0&&me<3){G.nmPaid=G.nmPaid||{};G.nmTx=G.nmTx||[];if(!G.nmPaid[NMS.room]){G.nmPaid[NMS.room]=1;G.nmTx.push({room:NMS.room,rank:me+1,coin:coin[me],ts:Date.now()});G.coins+=coin[me];N.paid=coin[me];gs()}}
  if(fin&&!N.xp){N.xp=1;addXP(10)}
  const o=$("skov");o.style.display="flex";o.style.overflow="auto";o.style.justifyContent="flex-start";
  o.innerHTML=`<h3 style="margin:0;color:#ffd93b">🏆 MATCH RESULTS</h3><div style="display:flex;gap:8px;align-items:flex-end;justify-content:center">${L.slice(0,3).map((p,i)=>`<div style="text-align:center"><div style="font-size:26px">${["🥇","🥈","🥉"][i]}</div><b style="font-size:12px">${esc(p.name)}</b><div style="font-size:11px">${p.pts} poin<br>${L.length>=3?coin[i]+" 🪙":""}</div></div>`).join("")}</div>
- <div style="font-size:12px;text-align:left;width:100%">${L.slice(0,56).map((p,i)=>`<div style="${p.k===NM_TAB?"color:#ffd93b;font-weight:700":""}">${i+1}. ${esc(p.name)} — ${p.pts}</div>`).join("")}</div>
+ <div style="font-size:12px;text-align:left;width:100%">${L.slice(0,56).map((p,i)=>`<div style="${p.k===nmPid?"color:#ffd93b;font-weight:700":""}">${i+1}. ${esc(p.name)} — ${p.pts}</div>`).join("")}</div>
  <div style="font-size:12px">✅ ${N.ok} · ❌ ${N.bad} · 🛡️ Safe Zone ${N.reached} · ⏱ ${Math.round(N.t)}s</div>${N.paid?`<b>+${N.paid} 🪙 masuk saldo (tercatat)</b>`:L.length<3?'<small>Hadiah COIN podium berlaku untuk room ≥ 3 pemain (ini latihan).</small>':""}
- <button class="pri" onclick="nmLobby()">🌙 Kembali ke Lobby</button><button onclick="skPlay('normal')">☀️ Day Mode</button>`}
+ <button class="pri" onclick="nmBack()">🌙 Kembali ke Lobby</button><button onclick="skPlay('normal')">☀️ Day Mode</button>`}
+setTimeout(()=>{try{const a=JSON.parse(sessionStorage.getItem("gk-nm-act")||"null");if(a&&a.code&&!NMS.code&&!SK&&!eng&&G&&G.name){stopRoom();nmResume(a)}}catch(e){}},4500);
+/* ---- efek horor: jumpscare Obake 10 detik, darah, getar, stun ---- */
+function nmFace(o){const c=document.getElementById("nmjc");if(!c)return;const im=skAssets[o.id],f=SKFACE[o.id]||[0,0,60,60];
+ const dr=()=>{try{const iw=im.naturalWidth,ih=im.naturalHeight;c.width=iw;c.height=ih;const g=c.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(im,0,0);
+  /* seluruh badan tetap utuh; kamera hanya di-zoom ke area wajah */
+  const vw=innerWidth,vh=innerHeight,k=Math.min(.8*vw/f[2],.72*vh/f[3]),fx=f[0]+f[2]/2,fy=f[1]+f[3]/2;
+  c.style.width=(iw*k)+"px";c.style.height=(ih*k)+"px";c.style.left=(vw/2-fx*k)+"px";c.style.top=(vh*.46-fy*k)+"px";c.style.transformOrigin=(fx*k)+"px "+(fy*k)+"px"}catch(e){}};
+ if(im&&im.naturalWidth)dr();else if(im)im.onload=dr}
+function nmScareOff(){clearTimeout(NMS.jsT);const e=document.getElementById("nmjs");if(e)e.remove()}
+function nmScare(E,o){nmScareOff();const src=((skAssets[o.id]||{}).src)||"",el=document.createElement("div");el.id="nmjs";
+ el.style.cssText="position:fixed;inset:0;z-index:99999;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none;user-select:none";
+ let dr="";for(let i=0;i<14;i++)dr+=`<div style="position:absolute;top:0;left:${(i*7.2+Math.random()*4).toFixed(1)}%;width:${(2+Math.random()*3).toFixed(1)}%;background:linear-gradient(#b00,#500);border-radius:0 0 60% 60%;animation:nmbl ${(2+Math.random()*5).toFixed(1)}s ease-in forwards"></div>`;
+ el.innerHTML=`<style>@keyframes nmzf{0%{transform:scale(.92)}8%{transform:scale(1.04)}100%{transform:scale(1.2)}}@keyframes nmz{0%{transform:scale(1)}30%{transform:scale(1.12) rotate(-1.5deg)}60%{transform:scale(1.05) rotate(1.5deg)}100%{transform:scale(1.2)}}@keyframes nmsh{0%,100%{transform:translate(0,0)}20%{transform:translate(-9px,5px)}40%{transform:translate(8px,-6px)}60%{transform:translate(-6px,-8px)}80%{transform:translate(7px,7px)}}@keyframes nmbl{0%{height:0}100%{height:42%}}@keyframes nmfl{0%,100%{opacity:.35}50%{opacity:1}}</style>
+ <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;animation:nmsh .16s infinite"><canvas id="nmjc" style="position:absolute;image-rendering:pixelated;animation:nmzf 10s ease-in forwards;filter:contrast(1.3) saturate(1.3) drop-shadow(0 0 34px #f00)"></canvas></div>
+ <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,rgba(0,0,0,0) 22%,rgba(130,0,0,.88) 100%);animation:nmfl .3s infinite;pointer-events:none"></div>${dr}
+ <div style="position:absolute;left:0;right:0;bottom:7%;text-align:center;color:#f33;font:900 clamp(28px,10vw,68px) sans-serif;letter-spacing:.06em;text-shadow:0 0 18px #000,0 0 6px #900">TERTANGKAP!</div>
+ <div id="nmjt" style="position:absolute;right:12px;top:10px;color:#fff;font:700 14px sans-serif;opacity:.8;text-shadow:0 1px 3px #000">${Math.round(10)}s</div>`;
+ document.body.appendChild(el);nmFace(o);try{navigator.vibrate&&navigator.vibrate([250,80,250,80,500,100,700])}catch(e){}
+ const t0=Date.now();clearInterval(NMS.jsI);NMS.jsI=setInterval(()=>{const t=document.getElementById("nmjt");if(!t){clearInterval(NMS.jsI);return}t.textContent=Math.max(0,Math.ceil(10-(Date.now()-t0)/1000))+"s"},250);
+ NMS.jsT=setTimeout(()=>{clearInterval(NMS.jsI);nmScareOff()},10000)}
+function nmFx(E){const N=E.nm,g=E.cx,cv=E.cv,W=cv.clientWidth,H=cv.clientHeight,b=N.buff,s=E.state,v=E.vp_;if(!v||N.over)return;
+ const dead=s==="caught"||s==="spec",hurt=dead?1:Math.max(0,((N.hurtT||0)-N.t)/1.2),st=b.stun?1:0,amp=dead?7:st?5:hurt*6;
+ cv.style.transform=amp>.3?`translate(${((Math.random()-.5)*amp).toFixed(1)}px,${((Math.random()-.5)*amp).toFixed(1)}px)`:"";
+ const px=(E.x-v[0])*v[2],py=(E.y-v[1])*v[2];g.save();
+ if(hurt>0||st){const a=(dead?.55:.35)*Math.max(hurt,st*.7)*(.75+.25*Math.sin(E.t*18)),gr=g.createRadialGradient(W/2,H/2,Math.min(W,H)*.25,W/2,H/2,Math.max(W,H)*.75);gr.addColorStop(0,"rgba(120,0,0,0)");gr.addColorStop(1,"rgba(150,0,10,"+a+")");g.fillStyle=gr;g.fillRect(0,0,W,H)}
+ if(dead&&N.bl){g.fillStyle="rgba(140,0,12,.72)";g.beginPath();g.ellipse(px,py,46*v[2],16*v[2],0,0,6.283);g.fill();for(const d of N.bl){const x=d.x*W,y=d.y*H*.8;g.beginPath();g.arc(x,y,d.r,0,6.283);g.fill();g.fillRect(x-d.r*.15,y,d.r*.3,d.d)}}
+ if(N.traps&&s==="play")for(const t of N.traps){if(!t.on)continue;const d0=Math.hypot(t.x-E.x,t.y-E.y);if(d0>280)continue;const a=(1-d0/280)*.85,tx=(t.x-v[0])*v[2],ty=(t.y-v[1])*v[2],r=20*v[2];g.save();g.globalAlpha=a*(.7+.3*Math.sin(E.t*6));g.strokeStyle="#ff3b3b";g.lineWidth=Math.max(1.5,2*v[2]);g.beginPath();g.ellipse(tx,ty,r,r*.45,0,0,6.283);g.stroke();g.beginPath();g.moveTo(tx-r*.6,ty-r*.2);g.lineTo(tx+r*.6,ty+r*.2);g.moveTo(tx+r*.6,ty-r*.2);g.lineTo(tx-r*.6,ty+r*.2);g.stroke();g.restore()}
+ if(st&&!dead){g.font="700 "+Math.max(14,20*v[2])+"px sans-serif";g.textAlign="center";for(let k=0;k<3;k++){const a=E.t*5+k*2.09;g.fillText("💫",px+Math.cos(a)*26*v[2],py-100*v[2]+Math.sin(a)*8*v[2])}}
+ if(b.god&&!dead){const pl=.6+.4*Math.sin(E.t*8);g.globalCompositeOperation="lighter";const gr=g.createRadialGradient(px,py-40*v[2],4,px,py-40*v[2],62*v[2]);gr.addColorStop(0,"rgba(255,230,120,"+.5*pl+")");gr.addColorStop(1,"rgba(255,200,60,0)");g.fillStyle=gr;g.fillRect(px-70*v[2],py-110*v[2],140*v[2],140*v[2])}
+ g.restore()}
+const _skD=skDraw;skDraw=function(E){_skD(E);if(E.nm)nmFx(E)};
+const _skS=skStop;skStop=function(){nmScareOff();return _skS.apply(this,arguments)};
+/* ---- diagnostik koneksi (broker, kode error, status) ---- */
+function mnDiagM(){const d=window.MN_DIAG2?MN_DIAG2():null;if(!d){toast("Diagnostik belum tersedia");return}
+ const ic=b=>b.state==="ONLINE"?"🟢":b.state==="MENYAMBUNG"?"🟡":"🔴",ag=x=>x==null?"–":x+"s";
+ modal(`<h3>📡 Diagnostik Koneksi</h3><div class="sm" style="text-align:left;line-height:1.6"><b>Status: ${d.online?"🟢 ONLINE":"🔴 OFFLINE"}</b> · halaman ${d.https?"HTTPS (hanya WSS)":"HTTP"}<br>Endpoint /ws lokal: ${esc(d.wsLocal)}<br>Room claude.ai: ${esc(d.native)}<hr>${d.brokers.map(b=>`${ic(b)} <b>${esc(b.host)}</b><br>&nbsp;&nbsp;${b.state}${b.err?" · "+esc(b.err):""}${b.code?" · kode WS "+b.code:""}${b.ack?" · CONNACK "+b.ack:""}<br>&nbsp;&nbsp;percobaan ${b.tries} · online sejak ${ag(b.okAgo)} · data terakhir ${ag(b.rxAgo)} lalu`).join("<br>")}</div><div class="row"><button onclick="claude.use('room').then(r=>{r.reconnect();toast('Menyambung ulang…')}).catch(()=>{});closeM()">🔄 Sambung ulang</button><button onclick="closeM();mnDiagM()">♻️ Segarkan</button></div>`)}
 /* tombol masuk Night Mode di Day Mode 学校 */
 const _riNM=rigInit;rigInit=function(E){_riNM(E);if(E.id==="a_school"){const ac=document.querySelector(".acts");if(ac&&!$("gknm")){ac.insertAdjacentHTML("beforeend",'<button id="gknm">🌙 Night: Obake Escape</button>');$("gknm").onclick=()=>{stopRoom();nmEntry()}}}};
 
