@@ -2654,7 +2654,7 @@ function nmCaught(E,o){const N=E.nm;if(N.over)return;
 function nmRevive(E){const N=E.nm;E.state="play";E.hp=1;E.inv=3;N.bl=null;E.cv.style.transform="";N.pts-=40;E.x=E.M.sp[0];E.y=E.M.sp[1];skMsg(E,"💚 Kamu diselamatkan! (−40 poin)",2.5)}
 function nmFinish(E){const N=E.nm;if(N.over)return;N.over=1;NMS.locked=0;E.state="over";E.cv.style.filter="";E.cv.style.transform="";nmScareOff();const q=$("nmq");if(q)q.remove();const ov=$("nmov");if(ov)ov.style.display="none";
  N.pts+=Math.floor(N.t);const sc=Math.max(0,Math.round(N.pts));NMS.res[nmPid]={name:nmName(),pts:sc};NMS.rs={sid:NMS.sid,pts:sc,name:nmName()};if(NMS.role==="sensei"&&NMS.host===nmPid)NMS.st="FINISHED";nmPub();nmBoard();setTimeout(()=>{if(SK===E)nmBoard(1)},3000)}
-function nmBoard(fin){const E=SK;if(!E||!E.nm)return;const N=E.nm,L=Object.entries(NMS.res).map(([k,v])=>({k,...v})).sort((a,b)=>b.pts-a.pts),me=L.findIndex(x=>x.k===nmPid),coin=[500,300,200];const sg=JSON.stringify(L)+(fin?1:0);if(NMS.bsg===sg)return;NMS.bsg=sg;
+function nmBoard(fin){const E=SK;if(!E||!E.nm)return;const N=E.nm,L=Object.entries(NMS.res).map(([k,v])=>({k,...v})).sort((a,b)=>b.pts-a.pts),me=L.findIndex(x=>x.k===nmPid),coin=[350,250,180];const sg=JSON.stringify(L)+(fin?1:0);if(NMS.bsg===sg)return;NMS.bsg=sg;
  if(fin&&me>=0){G.nmPaid=G.nmPaid||{};G.nmTx=G.nmTx||[];if(!G.nmPaid[NMS.room]){const pod=L.length>=3&&me<3,amt=pod?coin[me]:50;G.nmPaid[NMS.room]=1;G.nmTx.push({room:NMS.room,rank:me+1,coin:amt,pod,ts:Date.now()});G.coins+=amt;N.paid=amt;N.pod=pod;gs();hud()}}
  if(fin&&!N.xp){N.xp=1;addXP(10)}
  const o=$("skov");o.style.display="flex";o.style.overflow="auto";o.style.justifyContent="flex-start";
