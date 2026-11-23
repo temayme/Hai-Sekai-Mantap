@@ -1412,7 +1412,7 @@ try{known=new Set(JSON.parse(localStorage.getItem("mn1known")||"[]"))}catch(e){}
 function save(){try{localStorage.setItem("mn1known",JSON.stringify([...known]))}catch(e){}}
 const prog=l=>l.filter(w=>known.has(key(w))).length;
 let S="all",L=[],fc={},Q=[],qi=0,sc=0,mode="",done=false;
-const R=h=>{app.innerHTML=h;window.scrollTo(0,0)};
+let R=h=>{app.innerHTML=h;window.scrollTo(0,0)};
 const title=()=>S==="all"?"Semua Bab ("+lo()+"–"+hi()+")":typeof S==="string"?"Gabungan Bab "+S.slice(1)+"–"+(+S.slice(1)+4):"Bab "+S;
 
 function home(){
@@ -2366,7 +2366,7 @@ function skPlay(mode){
  else{E.tl=[];E.pts=M.P}
  $("skb").onclick=()=>skPlay("game");const sn=$("skn");if(sn)sn.onclick=()=>skPlay("normal");
  const kn=$("kn"),jy=$("jy");let on=false;
- const mv=e=>{const r=jy.getBoundingClientRect(),cx0=r.left+r.width/2,cy0=r.top+r.height/2;let dx=e.clientX-cx0,dy=e.clientY-cy0;const m=Math.hypot(dx,dy),R0=r.width/2-12;if(m>R0){dx*=R0/m;dy*=R0/m}kn.style.transform=`translate(${dx}px,${dy}px)`;E.vx=dx/R0;E.vy=dy/R0};
+ const mv=e=>{const r=jy.getBoundingClientRect(),cx0=r.left+r.width/2,cy0=r.top+r.height/2;let dx=e.clientX-cx0,dy=e.clientY-cy0;if(document.body.classList.contains("skrot")){const tt=dx;dx=dy;dy=-tt}const m=Math.hypot(dx,dy),R0=r.width/2-12;if(m>R0){dx*=R0/m;dy*=R0/m}kn.style.transform=`translate(${dx}px,${dy}px)`;E.vx=dx/R0;E.vy=dy/R0};
  jy.onpointerdown=e=>{jy.setPointerCapture(e.pointerId);on=true;mv(e)};jy.onpointermove=e=>{if(on)mv(e)};
  jy.onpointerup=jy.onpointercancel=()=>{on=false;E.vx=E.vy=0;kn.style.transform="none"};
  E.kd=ev=>{const k=ev.key.toLowerCase();if(["arrowup","arrowdown","arrowleft","arrowright"].includes(k))ev.preventDefault();E.keys[k]=1};E.ku=ev=>{delete E.keys[ev.key.toLowerCase()]};
@@ -2417,8 +2417,8 @@ function hudTxt(E){const h=$("skhud");if(!h)return;
  h.innerHTML=`<span>${"❤️".repeat(Math.max(0,E.hp))}${"🖤".repeat(Math.max(0,3-E.hp))}</span><span>🔖 ${E.got}/${E.need}</span>`;
  const m=$("skmsg");if(m)m.textContent=E.sayT>0?E.say:""}
 function skWin(E){E.state="win";const c=120+E.hp*30;G.coins+=c;addXP(15);G.cnt.sk_win=(G.cnt.sk_win||0)+1;gs();try{snd(660);setTimeout(()=>snd(990),120)}catch(e){}
- const o=$("skov");o.style.display="flex";o.innerHTML=`<div style="font-size:42px">🛡️</div><h3 style="color:#7dd8ff;margin:0">SAFE ZONE!</h3><div>Kamu selamat dengan ${E.hp} ❤️</div><b>+${c} 🪙 · +15 XP</b><button class="pri" onclick="skPlay('game')">Main lagi</button><button onclick="skPlay('normal')">☀️ Day Mode</button>`}
-function skLose(E,o){E.state="lose";const ov=$("skov");ov.style.display="flex";ov.innerHTML=`<div style="font-size:42px">💀</div><h3 style="color:#ff7a90;margin:0">GAME OVER</h3><div>Kamu ditangkap <b>${o.n}</b>.</div><button class="pri" onclick="skPlay('game')">Coba lagi</button><button onclick="skPlay('normal')">☀️ Day Mode</button>`}
+ const o=$("skov");o.style.display="flex";o.innerHTML=`<div class="gkov"><div class="gkv1"><div style="font-size:56px">🛡️</div><h3 style="color:#7dd8ff;margin:0">SAFE ZONE!</h3></div><div class="gkv2"><div>Kamu selamat dengan ${E.hp} ❤️</div><b>+${c} 🪙 · +15 XP</b><div class="gkbt"><button class="pri" onclick="skPlay('game')">🔁 Main Lagi</button><button onclick="skPlay('normal')">🏫 Kembali ke Menu</button></div></div></div>`}
+function skLose(E,o){E.state="lose";const ov=$("skov");ov.style.display="flex";ov.innerHTML=`<div class="gkov"><div class="gkv1"><div style="font-size:56px">💀</div><h3 style="color:#ff7a90;margin:0">GAME OVER</h3></div><div class="gkv2"><div>Kamu ditangkap <b>${o.n}</b>.</div><div class="gkbt"><button class="pri" onclick="skPlay('game')">🔁 Coba Lagi</button><button onclick="skPlay('normal')">🏫 Kembali ke Menu</button></div></div></div>`}
 function skDraw(E){
  const cv=E.cv,dpr=Math.min(2,window.devicePixelRatio||1),W=cv.clientWidth,H=cv.clientHeight;
  if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
@@ -2658,16 +2658,14 @@ function nmBoard(fin){const E=SK;if(!E||!E.nm)return;const N=E.nm,L=Object.entri
  if(fin&&me>=0){G.nmPaid=G.nmPaid||{};G.nmTx=G.nmTx||[];if(!G.nmPaid[NMS.room]){const pod=L.length>=3&&me<3,amt=pod?coin[me]:50;G.nmPaid[NMS.room]=1;G.nmTx.push({room:NMS.room,rank:me+1,coin:amt,pod,ts:Date.now()});G.coins+=amt;N.paid=amt;N.pod=pod;gs();hud()}}
  if(fin&&!N.xp){N.xp=1;addXP(10)}
  const o=$("skov");o.style.display="flex";o.style.overflow="auto";o.style.justifyContent="flex-start";
- o.innerHTML=`<h3 style="margin:0;color:#ffd93b">🏆 MATCH RESULTS</h3><div style="display:flex;gap:8px;align-items:flex-end;justify-content:center">${L.slice(0,3).map((p,i)=>`<div style="text-align:center"><div style="font-size:26px">${["🥇","🥈","🥉"][i]}</div><b style="font-size:12px">${esc(p.name)}</b><div style="font-size:11px">${p.pts} poin<br>${L.length>=3?coin[i]+" 🪙":""}</div></div>`).join("")}</div>
- <div style="font-size:12px;text-align:left;width:100%">${L.slice(0,56).map((p,i)=>`<div style="${p.k===nmPid?"color:#ffd93b;font-weight:700":""}">${i+1}. ${esc(p.name)} — ${p.pts}</div>`).join("")}</div>
- <div style="font-size:12px">✅ ${N.ok} · ❌ ${N.bad} · 🛡️ Safe Zone ${N.reached} · ⏱ ${Math.round(N.t)}s</div>${N.paid?`<b>${N.pod?"🏆 Podium! ":"Hadiah hiburan: "}+${N.paid} 🪙 otomatis masuk ke Sawit kamu</b>`:L.length<3?'<small>Menghitung hadiah…</small>':""}
- <button class="pri" onclick="nmBack()">🌙 Kembali ke Lobby</button><button onclick="skPlay('normal')">☀️ Day Mode</button>`}
+ const pd=[1,0,2].map(i=>{const p=L[i];return `<div class="pd pd${i+1}"><b class="pdn">${p?esc(p.name):"—"}</b><span class="pdp">${p?p.pts+" poin":""}${p&&L.length>=3?"<br>"+coin[i]+" 🪙":""}</span><div class="pdb">${["🥇","🥈","🥉"][i]}</div></div>`}).join("");
+ o.innerHTML=`<div class="gkres"><div class="gkc1"><h3>🏆 MATCH RESULTS</h3><div class="gkpod">${pd}</div></div><div class="gkc2"><b class="gkh">📋 Peringkat akhir</b><div class="gklist">${L.slice(0,56).map((p,i)=>`<div class="${p.k===nmPid?"me":""}">${i+1}. ${esc(p.name)} — ${p.pts}</div>`).join("")}</div></div><div class="gkc3"><b class="gkh">📊 Statistikmu</b><div class="gkst">✅ ${N.ok} · ❌ ${N.bad}<br>🛡️ Safe Zone ${N.reached} · ⏱ ${Math.round(N.t)}s</div>${N.paid?`<b class="gkrw">${N.pod?"🏆 Podium! ":"Hadiah hiburan: "}+${N.paid} 🪙 otomatis masuk ke Sawit kamu</b>`:L.length<3?"<small>Menghitung hadiah…</small>":""}<button class="pri" onclick="nmBack()">🔁 Main Lagi</button><button onclick="skPlay('normal')">🏫 Kembali ke Menu</button></div></div>`}
 setTimeout(()=>{try{const a=JSON.parse(sessionStorage.getItem("gk-nm-act")||"null");if(a&&a.code&&!NMS.code&&!SK&&!eng&&G&&G.name){stopRoom();nmResume(a)}}catch(e){}},4500);
 /* ---- efek horor: jumpscare Obake 10 detik, darah, getar, stun ---- */
 function nmFace(o){const c=document.getElementById("nmjc");if(!c)return;const im=skAssets[o.id],f=SKFACE[o.id]||[0,0,60,60];
  const dr=()=>{try{const iw=im.naturalWidth,ih=im.naturalHeight;c.width=iw;c.height=ih;const g=c.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(im,0,0);
   /* seluruh badan tetap utuh; kamera hanya di-zoom ke area wajah */
-  const vw=innerWidth,vh=innerHeight,k=Math.min(.8*vw/f[2],.72*vh/f[3]),fx=f[0]+f[2]/2,fy=f[1]+f[3]/2;
+  const vw=gkVW(),vh=gkVH(),k=Math.min(.8*vw/f[2],.72*vh/f[3]),fx=f[0]+f[2]/2,fy=f[1]+f[3]/2;
   c.style.width=(iw*k)+"px";c.style.height=(ih*k)+"px";c.style.left=(vw/2-fx*k)+"px";c.style.top=(vh*.46-fy*k)+"px";c.style.transformOrigin=(fx*k)+"px "+(fy*k)+"px"}catch(e){}};
  if(im&&im.naturalWidth)dr();else if(im)im.onload=dr}
 function nmScareOff(){clearTimeout(NMS.jsT);const e=document.getElementById("nmjs");if(e)e.remove()}
@@ -2708,6 +2706,226 @@ const SWSRC="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABMCAYAAACS9rJ1A
  function sw(n){if(n.nodeType===3){if(n.nodeValue.indexOf("🪙")<0)return;const p=n.parentNode;if(!p||/^(SCRIPT|STYLE|TEXTAREA|INPUT)$/.test(p.nodeName))return;const f=document.createDocumentFragment();n.nodeValue.split("🪙").forEach((t,i)=>{if(i){const im=new Image();im.className="sw";im.alt="Sawit";im.src=SWSRC;f.appendChild(im)}if(t)f.appendChild(document.createTextNode(t))});p.replaceChild(f,n)}
   else if(n.nodeType===1&&!/^(SCRIPT|STYLE)$/.test(n.nodeName))for(const c of Array.from(n.childNodes))sw(c)}
  new MutationObserver(ms=>{for(const m of ms){if(m.type==="characterData")sw(m.target);else m.addedNodes.forEach(sw)}}).observe(document.body,{childList:true,subtree:true,characterData:true});sw(document.body)})();
+
+/* ===== LANDSCAPE FULL LAYAR: joystick di kanan, tombol aksi di kiri ===== */
+(function(){const st=document.createElement("style");st.textContent=`
+body.skfs{overflow:hidden;background:#000}
+body.skfs main{position:fixed;inset:0;max-width:none;width:auto;margin:0;padding:0;z-index:9000;background:#000;overflow:hidden}
+body.skfs main>*{display:none!important}
+body.skfs main>#skst,body.skfs main>.ctl,body.skfs main>.back{display:block!important}
+body.skfs #skst{position:absolute;inset:0;width:auto;height:auto;max-height:none!important;aspect-ratio:auto!important;border:0;border-radius:0;box-shadow:none}
+body.skfs .ctl{position:absolute;inset:0;margin:0;pointer-events:none;z-index:9001}
+body.skfs .joy{position:absolute;right:calc(28px + env(safe-area-inset-right,0px));bottom:calc(22px + env(safe-area-inset-bottom,0px));pointer-events:auto;opacity:.85}
+body.skfs .acts{position:absolute;left:calc(18px + env(safe-area-inset-left,0px));bottom:18px;width:150px;gap:6px;pointer-events:auto}
+body.skfs .acts button{padding:7px 8px;font-size:13px;opacity:.88}
+body.skfs #skb,body.skfs #skn{display:none}
+body.skfs .back{position:absolute;top:6px;left:50%;transform:translateX(-50%);margin:0;z-index:9002;padding:5px 12px;font-size:12px;opacity:.85}
+body.skfs #nmq{left:50%!important;right:auto!important;top:auto!important;bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;width:clamp(260px,calc(var(--lw,100vw) - 340px),560px);transform:translateX(-50%);padding:6px!important}
+body.skfs #skmsg{bottom:auto!important;top:40px}
+body.skfs #nmq button{padding:4px 6px!important;font-size:12px!important;margin:0}
+body.skfs #nmq div{font-size:12px!important}
+`;document.head.appendChild(st)})();
+function skRot(){gklRot()}
+function skFull(on,force){const b=document.body;
+ if(!on){b.classList.remove("skfs","skrot");if(force&&!GKL.on){try{document.fullscreenElement&&document.exitFullscreen()}catch(e){}try{screen.orientation&&screen.orientation.unlock&&screen.orientation.unlock()}catch(e){}}return}
+ b.classList.add("skfs");gklOn();skRot()}
+addEventListener("resize",skRot);addEventListener("orientationchange",()=>setTimeout(skRot,250));
+const _skPlF=skPlay;skPlay=function(mode){_skPlF(mode);skFull(mode==="game"&&!!SK,mode!=="game")};
+const _skStF=skStop;skStop=function(){const r=_skStF.apply(this,arguments);if(document.body.classList.contains("skfs")&&!SK)document.body.classList.remove("skfs","skrot");return r};
+const _skLvF=skLeave;skLeave=function(){skFull(false,true);return _skLvF.apply(this,arguments)};
+const _gaF=goArea;goArea=function(){skFull(false,true);return _gaF.apply(this,arguments)};
+const _wlF=world;world=function(){skFull(false,true);return _wlF.apply(this,arguments)};
+
+/* ===== DUNIA 学校 (Day Mode): landscape fullscreen, joystick kanan bawah, kamera ikut karakter, nama lokasi ===== */
+const WFS={fs:0,pend:0};
+(function(){const st=document.createElement("style");st.textContent=`
+body.wfs{overflow:hidden;background:#000}
+body.wfs>*:not(main):not(.modal):not(.toast):not(.gkx):not(script):not(style){display:none!important}
+body.wfs main{position:fixed;inset:0;max-width:none;width:auto;margin:0;padding:0;z-index:9000;background:#000;overflow:hidden}
+body.wfs main>*{display:none!important}
+body.wfs main>#st,body.wfs main>.ctl,body.wfs main>.back{display:block!important}
+body.wfs #st{position:absolute;inset:0;width:auto;height:auto;max-height:none!important;aspect-ratio:auto!important;border:0;border-radius:0;box-shadow:none;animation:wfin .6s ease-out}
+body.wfs .ctl{position:absolute;inset:0;margin:0;pointer-events:none;z-index:9001}
+body.wfs .joy{position:absolute;left:auto;top:auto;right:calc(30px + env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));width:128px;height:128px;pointer-events:auto;opacity:.88}
+body.wfs .joy .knob{width:52px;height:52px;left:34px;top:34px}
+body.wfs .acts{position:absolute;left:calc(18px + env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));width:150px;gap:6px;pointer-events:auto}
+body.wfs .acts button{padding:7px 8px;font-size:13px;opacity:.9}
+body.wfs .back{position:absolute;top:6px;left:50%;transform:translateX(-50%);margin:0;z-index:9002;padding:5px 12px;font-size:12px;opacity:.85}
+body.wfs .acts .back{position:static;transform:none;margin:0;padding:7px 8px;font-size:13px;opacity:.9;z-index:auto;min-height:40px}body.wfs .acts #wv{min-height:40px}
+body.wfs .mps{top:auto!important;bottom:6px!important;left:50%!important;right:auto!important;transform:translateX(-50%);font-size:11px;padding:3px 8px;opacity:.9}
+body.wfs .modal{z-index:9500}body.wfs .toast{z-index:9600}
+#locb{position:absolute;top:40px;left:50%;transform:translateX(-50%);z-index:9;background:rgba(40,10,50,.84);color:#fff;border:2px solid #ff2d95;border-radius:99px;padding:5px 18px;font-weight:700;font-size:14px;opacity:0;transition:opacity .45s;pointer-events:none;white-space:nowrap}
+@keyframes wfin{from{opacity:0}to{opacity:1}}
+`;document.head.appendChild(st)})();
+function wfsRot(){gklRot()}
+/* dunia = 2,5×… lebar viewport; di landscape skala dunia mengikuti TINGGI layar supaya karakter tetap besar dan area pandang lebih luas */
+function wfsFit(){const E=eng;if(!E||!E.Z||!AREA[E.id])return;const on=document.body.classList.contains("wfs");
+ if(E.Z.cam&&E.vp){E.st.style.width=on?Math.round(E.Z.cam*E.vp.clientHeight*1.1)+"px":E.Z.cam*100+"%";E.cx=-1;return}
+ /* area tanpa kamera: peta dimuat utuh (contain) di tengah layar landscape */
+ const s=E.st;if(!s||!E.Z.w||!E.Z.h)return;
+ if(on){const r=E.Z.w/E.Z.h,W=gkVW(),H=gkVH(),w=Math.min(W,H*r);Object.assign(s.style,{left:"50%",top:"50%",right:"auto",bottom:"auto",width:Math.round(w)+"px",height:Math.round(w/r)+"px",transform:"translate(-50%,-50%)"})}
+ else Object.assign(s.style,{left:"",top:"",right:"",bottom:"",width:"",height:"",transform:""})}
+function wfsOn(){const E=eng,b=document.body;if(!E||!AREA[E.id])return;WFS.pend=0;b.classList.add("wfs");gklOn();
+ wfsRot();wfsFit();
+ {const bk=document.querySelector('main>.back'),wv=$('wv');if(bk&&wv&&wv.parentNode){bk.removeAttribute('onclick');bk.onclick=()=>modal('<h3>Keluar dari room?</h3><p class="sm">Kamu akan meninggalkan area ini.</p><div class="row"><button class="pri" onclick="closeM();leave()">Ya, keluar</button></div>');wv.parentNode.insertBefore(bk,wv)}}
+ const jy=$("jy"),kn=$("kn");if(jy&&kn){let on=false;
+  const mv=e=>{const r=jy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,rot=b.classList.contains("wrot");let dx=e.clientX-cx,dy=e.clientY-cy;const m=Math.hypot(dx,dy),R0=r.width/2-12;if(m>R0){dx*=R0/m;dy*=R0/m}
+   const lx=rot?dy:dx,ly=rot?-dx:dy;kn.style.transform=`translate(${lx}px,${ly}px)`;E.vx=lx/R0;E.vy=ly/R0};
+  jy.onpointerdown=e=>{jy.setPointerCapture(e.pointerId);on=true;mv(e)};jy.onpointermove=e=>{if(on)mv(e)};
+  jy.onpointerup=jy.onpointercancel=()=>{on=false;E.vx=E.vy=0;kn.style.transform="none"}}}
+addEventListener("resize",()=>{wfsRot();wfsFit()});addEventListener("orientationchange",()=>setTimeout(()=>{wfsRot();wfsFit()},250));
+const _enW=enter;enter=function(id){GKL.next=AREA[id]?1:0;try{const r=_enW.apply(this,arguments);if(AREA[id]&&eng&&eng.id===id)wfsOn();return r}finally{GKL.next=0}};
+const _stW=stopRoom;stopRoom=function(){document.body.classList.remove("wfs","wrot");const r=_stW.apply(this,arguments);
+ setTimeout(()=>{const b=document.body;if(WFS.fs&&!GKL.on&&!b.classList.contains("wfs")&&!b.classList.contains("skfs")&&document.fullscreenElement){try{document.exitFullscreen()}catch(e){}try{screen.orientation&&screen.orientation.unlock&&screen.orientation.unlock()}catch(e){}WFS.fs=0}},350);return r};
+const _gaW=goArea;goArea=function(id){if(AREA[id]&&G.un&&G.un[id])WFS.pend=1;return _gaW.apply(this,arguments)};
+const _sfW=skFull;skFull=function(on,force){if(!on&&force&&WFS.pend){document.body.classList.remove("skfs","skrot");return}return _sfW.apply(this,arguments)};
+/* nama lokasi saat pemain memasuki area baru */
+const WLOC=[["⛩️ Gerbang Sekolah",40,56,7],["👟 Genkan · Pintu Masuk",40,49,5],["🚲 Parkir Sepeda",11,56,7],["⚽ Lapangan Olahraga",16,6,14],["🏀 Gym",13,19,9],["📚 Perpustakaan",32,19,9],["🧑‍🏫 Ruang Guru",57,35,8],["🗂️ Ruang Administrasi",51,49,6],["📦 Gudang",59,49,5],["✏️ Ruang Kelas Barat",29,46,8],["✏️ Ruang Kelas Timur",68,46,8],["🎹 Ruang Musik",9,50,6],["🌸 Taman Sakura",37,35,10],["🚻 Toilet",67,33,6]];
+function wfsLoc(E){const i=E.x/GKU,j=E.y/GKU;let best=null,bd=1;for(const z of WLOC){const d=Math.hypot(i-z[1],j-z[2])/z[3];if(d<bd){bd=d;best=z}}
+ const n=best?best[0]:(j>=26&&j<=29.5?"🚪 Lorong Utama":"");if(!n||n===E.loc)return;E.loc=n;
+ let b=$("locb");if(!b){E.vp.insertAdjacentHTML("beforeend",'<div id="locb"></div>');b=$("locb")}b.textContent="📍 "+n;b.style.opacity=1;clearTimeout(E.locT);E.locT=setTimeout(()=>{const q=$("locb");if(q)q.style.opacity=0},2600)}
+const _dEW=drawE;drawE=function(E){_dEW(E);if(E.id==="a_school"&&E.vp)wfsLoc(E)};
+
+/* =====================================================================
+   GAKKOU LANDSCAPE v2 — satu sistem orientasi global untuk SELURUH modul Gakkou
+   Modul Gakkou = menu Dunia, semua area (Taman, 学校, Area Sosial, dst: lihat AREA),
+   Night Mode Obake Escape (Sensei/Player, lobby, persiapan, game, hasil, podium).
+   Landscape aktif saat masuk modul, bertahan antar halaman/map/menang/kalah,
+   dan baru dilepas saat pemain keluar ke website utama (home/rooms/toko dll).
+   Urutan: Fullscreen API -> Screen Orientation lock -> fallback layout landscape (rotasi CSS + pemberitahuan).
+   ===================================================================== */
+const GKL={on:0,lock:0,menu:0,next:0,last:"",warned:0,pi:0,fsOK:1};
+(function(){const st=document.createElement("style");st.textContent=`
+body.gkl{overflow:hidden;overscroll-behavior:none}
+/* fallback: perangkat tegak & kunci orientasi tak didukung -> seluruh halaman diputar 90° jadi landscape */
+body.gkl.grot{position:fixed;left:var(--gkw,100vw);top:0;width:var(--gkh,100vh);height:var(--gkw,100vw);min-height:0;margin:0;transform-origin:0 0;transform:rotate(90deg)}
+/* ---------- layout menu landscape (Dunia, Sensei/Player, gabung lobby, lobby/ruang tunggu) ---------- */
+body.gkl:not(.skfs):not(.wfs) main{position:fixed;inset:0;max-width:none;width:auto;margin:0;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:8px;padding:calc(8px + env(safe-area-inset-top,0px)) calc(14px + env(safe-area-inset-right,0px)) 12px calc(14px + env(safe-area-inset-left,0px))}
+.gkbar{display:flex;align-items:center;gap:12px;flex:none;padding-right:112px}
+.gkbar .back{margin:0;flex:none;white-space:nowrap}
+.gkbar h2{margin:0;flex:1;text-align:left;font-size:17px;line-height:1.15}
+.gkbar h2 small{font-size:11px!important}
+.gkbody{display:flex;flex-direction:column;gap:10px;margin:auto 0;width:100%;max-width:1000px;align-self:center}
+.gkbody .gg{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.gkbody>.all{width:auto;min-width:260px;align-self:center;margin:0;padding:8px 14px}
+.gkbody .gg{margin-top:0}
+body.gkl:not(.skfs):not(.wfs)>footer.cr{position:fixed;bottom:2px;right:8px;margin:0;font-size:9px;opacity:.65;pointer-events:none;z-index:1;transform:scale(.55);transform-origin:100% 100%}
+.gkcard{min-height:0!important;padding:10px 14px!important;border-width:3px;display:grid!important;grid-template-columns:1fr 1fr;gap:10px 14px!important;align-items:stretch!important;align-content:center;text-align:center}
+.gkcard::after{display:none}
+.gkcard>p,.gkcard>label,.gkcard>input,.gkcard>small,.gkcard>b,.gkcard>.row,.gkcard>div{grid-column:1/-1}
+.gkcard .row{margin-top:2px}
+.gkcard.gk3>.gkcol{grid-column:auto}
+.gkcard>button:only-of-type{grid-column:1/-1}
+.gkcard>button{padding:16px 10px;font-size:16px}
+.gkcard.gk3{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));align-items:start!important;text-align:left}
+.gkcard.gk3 .row{flex-wrap:wrap;margin-top:0}
+.gkcard.gk3 .row button{flex:1 1 72px}
+.gkcard.gk3 .gkcol div[style*="repeat(5"] button{padding:3px 0!important;font-size:13px}
+.gkrow{display:flex;flex-direction:row;flex-wrap:nowrap;gap:8px;align-items:stretch;width:100%}.gkrow button{flex:1 1 0;min-width:0;min-height:44px;margin:0;align-self:stretch!important;font-size:13px!important;line-height:1.2;padding:8px 6px!important;white-space:normal;overflow-wrap:anywhere}.gkrow button[onclick^="nmStart"],.gkrow button[onclick^="nmReady"]{flex:1.4 1 0}
+.gkcol{display:flex;flex-direction:column;gap:7px;min-width:0}
+.gkcard.gk3 .gkcol>button,.gkcard.gk3 .gkcol .row button{padding:8px 10px;font-size:14px}
+.gkcard.gk3 .gkcol .sm{max-height:calc(var(--lh,100vh) - 150px);overflow:auto}
+body.gkl .modal{padding:8px}
+body.gkl .mc{max-height:calc(var(--lh,100vh) - 24px);max-width:min(560px,94%)}
+/* ---------- pemberitahuan putar perangkat & layar persiapan ---------- */
+#gknote{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:99990;background:#ff2d95;color:#fff;border:2px solid #fff;border-radius:99px;padding:6px 16px;font-weight:700;font-size:13px;box-shadow:0 3px 0 #b8106a;pointer-events:none;white-space:nowrap;animation:gkn .4s ease-out}
+@keyframes gkn{from{opacity:0;transform:translate(-50%,-10px)}to{opacity:1;transform:translate(-50%,0)}}
+#gkpre{position:fixed;inset:0;z-index:99980;background:radial-gradient(circle at 50% 40%,#3a0a52,#0a0010);display:grid;place-items:center;color:#fff;text-align:center}
+#gkpre .gkpc{display:flex;flex-direction:column;align-items:center;gap:6px}
+#gkpre b{font:700 22px "Pixelify Sans",monospace;letter-spacing:.08em}
+#gkpn{font:700 72px/1 "Pixelify Sans",monospace;color:#ffd93b;text-shadow:0 4px 0 #b8106a}
+/* ---------- hasil / game over / podium dalam bentuk horizontal ---------- */
+body.skfs #skov{z-index:9100!important;padding:8px 14px!important;justify-content:center!important;align-items:center!important;overflow:hidden!important;gap:0!important;text-align:left!important}
+#skov .gkov{display:flex;align-items:center;justify-content:center;gap:clamp(16px,5vw,48px);width:100%}
+#skov .gkv1{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+#skov .gkv2{display:flex;flex-direction:column;gap:8px;align-items:flex-start;text-align:left}
+#skov .gkbt{display:flex;gap:8px;margin-top:4px}
+#skov .gkbt button,#skov .gkc3 button{padding:8px 14px;font-size:14px}
+#skov .gkres{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:stretch;width:100%;max-width:920px;height:auto;max-height:100%}
+#skov .gkres>div{display:flex;flex-direction:column;gap:6px;min-height:0;min-width:0}
+#skov .gkres h3{margin:0;color:#ffd93b;text-align:center;font-size:16px}
+#skov .gkh{font-size:13px;color:#ffd93b}
+#skov .gkpod{display:flex;align-items:flex-end;justify-content:center;gap:6px;flex:none;margin:auto 0;min-height:0}
+#skov .pd{flex:1;display:flex;flex-direction:column;justify-content:flex-end;text-align:center;min-width:0}
+#skov .pdn{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#skov .pdp{font-size:11px;line-height:1.25;min-height:28px}
+#skov .pdb{display:grid;place-items:center;font-size:24px;border-radius:8px 8px 0 0;color:#2a0a30}
+#skov .pd1 .pdb{height:84px;background:linear-gradient(#ffe27a,#e0a800)}
+#skov .pd2 .pdb{height:60px;background:linear-gradient(#eef2f7,#9fb0c4)}
+#skov .pd3 .pdb{height:42px;background:linear-gradient(#ffb877,#c0702a)}
+#skov .gklist{flex:1;min-height:0;overflow:auto;font-size:12px;line-height:1.5}
+#skov .gklist .me{color:#ffd93b;font-weight:700}
+#skov .gkst{font-size:12px;line-height:1.5}
+#skov .gkrw{font-size:12px;color:#ffd93b}
+`;document.head.appendChild(st)})();
+
+const gkTouch=()=>{try{return navigator.maxTouchPoints>0||matchMedia("(pointer:coarse)").matches}catch(e){return false}};
+/* ukuran layar dalam orientasi landscape (memperhitungkan fallback rotasi) */
+function gkVW(){return document.body.classList.contains("grot")?innerHeight:innerWidth}
+function gkVH(){return document.body.classList.contains("grot")?innerWidth:innerHeight}
+
+/* sinkronkan kelas rotasi + variabel ukuran; dipanggil saat resize / orientationchange / fullscreenchange */
+function gklRot(){const b=document.body;if(!b)return;
+ if(!GKL.on){b.classList.remove("grot","skrot","wrot");return}
+ const W=innerWidth,H=innerHeight,por=H>W&&gkTouch(),s=b.style;
+ b.classList.toggle("grot",por);b.classList.toggle("skrot",por&&b.classList.contains("skfs"));b.classList.toggle("wrot",por&&b.classList.contains("wfs"));
+ s.setProperty("--gkw",W+"px");s.setProperty("--gkh",H+"px");s.setProperty("--lw",(por?H:W)+"px");s.setProperty("--lh",(por?W:H)+"px");
+ if(por&&GKL.lock!==1)gkNote();else{if(!por)GKL.warned=0;gkNoteOff()}
+ try{wfsFit()}catch(e){}}
+function gkNote(){if(GKL.warned||!GKL.on)return;GKL.warned=1;gkNoteOff();const d=document.createElement("div");d.id="gknote";d.className="gkx";d.innerHTML="📱↻ Putar ponsel ke posisi <b>horizontal</b> untuk tampilan terbaik";document.body.appendChild(d);GKL.nT=setTimeout(gkNoteOff,6000)}
+function gkNoteOff(){clearTimeout(GKL.nT);const d=document.getElementById("gknote");if(d)d.remove()}
+
+/* minta layar penuh + kunci landscape (harus dari interaksi pengguna; aman dipanggil berulang) */
+function gklReq(){const d=document,de=d.documentElement;
+ const lockIt=()=>{try{const o=screen.orientation;if(o&&o.lock){const r=o.lock("landscape");if(r&&r.then)r.then(()=>{GKL.lock=1;gklRot()},()=>{GKL.lock=0;gklRot()});else{GKL.lock=1}}}catch(e){GKL.lock=0}};
+ const rq=de.requestFullscreen||de.webkitRequestFullscreen;
+ try{if(!d.fullscreenElement&&rq){const r=rq.call(de,{navigationUI:"hide"});WFS.fs=1;if(r&&r.then)r.then(lockIt,lockIt);else lockIt();if(r&&r.catch)r.catch(()=>{})}else{if(!rq)GKL.fsOK=0;lockIt()}}catch(e){lockIt()}}
+function gklOn(){const b=document.body;if(!GKL.on){GKL.on=1;GKL.warned=0;GKL.lock=0}b.classList.add("gkl");gklReq();gklRot()}
+function gklOff(){if(!GKL.on)return;GKL.on=0;GKL.menu=0;GKL.next=0;GKL.lock=0;GKL.last="";const b=document.body;
+ b.classList.remove("gkl","grot","skfs","skrot","wfs","wrot");["--gkw","--gkh","--lw","--lh"].forEach(p=>b.style.removeProperty(p));
+ gkNoteOff();gkPre(0);
+ try{document.fullscreenElement&&document.exitFullscreen()}catch(e){}try{screen.orientation&&screen.orientation.unlock&&screen.orientation.unlock()}catch(e){}
+ WFS.fs=0}
+addEventListener("resize",gklRot);addEventListener("orientationchange",()=>setTimeout(gklRot,250));
+document.addEventListener("fullscreenchange",()=>{if(GKL.on&&!document.fullscreenElement)GKL.lock=0;gklRot()});
+/* jika layar penuh terlepas (swipe/back) saat masih di modul Gakkou, masuk lagi pada sentuhan berikutnya */
+document.addEventListener("pointerdown",()=>{if(GKL.on&&GKL.fsOK&&gkTouch()&&!document.fullscreenElement)gklReq()},true);
+
+/* ---- susun ulang halaman menu agar benar-benar horizontal (bukan portrait yang diputar) ---- */
+function gklMenu(){const m=document.getElementById("app");if(!m||m.querySelector("#st,#skst,.gkbar"))return;
+ const kids=[...m.children],back=kids.find(k=>k.classList.contains("back")),h2=kids.find(k=>k.tagName==="H2");
+ const bar=document.createElement("div");bar.className="gkbar";if(back)bar.appendChild(back);if(h2)bar.appendChild(h2);
+ const body=document.createElement("div");body.className="gkbody";[...m.children].forEach(k=>body.appendChild(k));m.append(bar,body);
+ const card=body.querySelector(":scope>.card");if(card){card.classList.add("gkcard");gklLobby(card)}}
+/* lobby Sensei/Player: 3 kolom = [Room ID, Buku, Kesulitan] | [Bab] | [Pemain + Start/Ready] */
+function gklLobby(card){const ks=[...card.children];if(!ks.some(k=>k.tagName==="B"&&/^👥/.test(k.textContent)))return;
+ const c=[0,1,2].map(()=>{const d=document.createElement("div");d.className="gkcol";return d});let cur=c[0];
+ for(const k of ks){if(k.tagName==="B"){const t=k.textContent;if(/^📖/.test(t))cur=c[1];else if(/^🎚/.test(t))cur=c[0];else if(/^👥/.test(t))cur=c[2]}cur.appendChild(k)}
+ card.append(...c);card.classList.add("gk3");
+ const dg=card.querySelector('button[onclick*="mnDiagM"]'),ac=card.querySelector('button[onclick^="nmStart"],button[onclick^="nmReady"]');
+ if(dg&&ac){const r=document.createElement("div");r.className="gkrow";dg.parentNode.insertBefore(r,dg);r.append(dg,ac)}}
+
+/* ---- layar persiapan sebelum game dimulai (landscape) ---- */
+function gkPre(on){const o=document.getElementById("gkpre");
+ if(!on){clearInterval(GKL.pi);GKL.pi=0;if(o)o.remove();return}
+ if(o)return;let n=3;const d=document.createElement("div");d.id="gkpre";d.className="gkx";
+ d.innerHTML='<div class="gkpc"><div style="font-size:44px">🌙</div><b>PERSIAPAN PERMAINAN</b><div id="gkpn">3</div><small>Obake Escape · siapkan jarimu…</small></div>';document.body.appendChild(d);
+ GKL.pi=setInterval(()=>{n--;const e=document.getElementById("gkpn");if(n<=0||!e){gkPre(0);return}e.textContent=n},1000)}
+
+/* ---- R(): satu-satunya pintu render halaman -> di sinilah modul Gakkou dinyalakan / dimatikan ---- */
+const _R0=R;
+R=function(h){const mk=GKL.menu,same=!!mk&&GKL.on&&GKL.last===mk,sy=same?app.scrollTop:0;
+ _R0(h);
+ const gk=!!(mk||GKL.next||app.querySelector("#skst"));
+ GKL.last=mk||(gk?"area":"");
+ if(gk){if(!GKL.on)gklOn();else gklRot();if(mk){gklMenu();if(same)app.scrollTop=sy}}
+ else if(GKL.on)gklOff()};
+/* halaman menu yang termasuk modul Gakkou */
+const _gkW=world;world=function(){GKL.menu="world";try{return _gkW.apply(this,arguments)}finally{GKL.menu=0}};
+const _gkE=nmEntry;nmEntry=function(){GKL.menu="role";try{return _gkE.apply(this,arguments)}finally{GKL.menu=0}};
+const _gkJ=nmRole;nmRole=function(){GKL.menu="join";try{return _gkJ.apply(this,arguments)}finally{GKL.menu=0}};
+const _gkL=nmLobby;nmLobby=function(){GKL.menu="lobby";try{const r=_gkL.apply(this,arguments);if(NMS.st==="STARTING")gkPre(1);else gkPre(0);return r}finally{GKL.menu=0}};
+const _gkP=skPlay;skPlay=function(mode){if(mode==="game")gkPre(0);return _gkP.apply(this,arguments)};
 </script>
 </body>
 </html>
