@@ -2326,7 +2326,7 @@ function skPace(E,o,ch,dt){let m=1;const t=E.t;
  else if(o.id==="bakeba")m=.8+.35*Math.sin(t*.9+o.t0);
  else if(o.id==="kage"){o.pt=(o.pt||0)+dt;const ph=o.ph||0,L=[2.4,.9,.7][ph];if(o.pt>=L){o.pt=0;o.ph=(ph+1)%3}m=[.6,1.55,.1][o.ph||0]}
  else{o.cs=(o.cs||0)+dt;m=(.65+.55*Math.min(1,o.cs/7))*(Math.sin(t*1.7+o.t0)>.88?.3:1)}
- if(E.nm&&E.nm.buff.mslow)m*=.45;
+ if(E.nm&&(E.nm.buff.mslow||E.nm.msn))m*=.45;
  return m}
 let SK=null;
 const skImg=src=>{const i=new Image();i.src=src;return i};
@@ -2390,13 +2390,14 @@ function skTick(E,dt){
  E.cam.x+=(E.x-E.cam.x)*Math.min(1,dt*8);E.cam.y+=(E.y-E.cam.y)*Math.min(1,dt*8);
  if(!E.game){if(E.pts)for(const p of E.pts)if(Math.hypot(p[0]-E.x,p[1]-E.y)<70&&E.last!==p){E.last=p;skMsg(E,p[2],3.2)}
   hudTxt(E);return}
- if(E.state!=="play"){hudTxt(E);return}
+ if(E.state!=="play"){if(E.nm&&E.nm.net)nmNetMon(E,dt,1);hudTxt(E);return}
  /* jimat */
  for(const t of E.tl)if(t.on&&Math.hypot(t.x-E.x,t.y-E.y)<42){t.on=0;E.got++;try{snd(880)}catch(e){}skMsg(E,E.got>=E.need?"🔓 SAFE ZONE terbuka! Lari ke atas!":"🔖 Jimat "+E.got+"/"+E.need,2.4)}
  /* safe zone */
  if(E.got>=E.need&&Math.hypot(E.M.safe[0]-E.x,E.M.safe[1]-E.y)<58){skWin(E);return}
  else if(E.got<E.need&&Math.hypot(E.M.safe[0]-E.x,E.M.safe[1]-E.y)<58&&E.sayT<=0)skMsg(E,"🔒 Portal terkunci — butuh "+E.need+" jimat 🔖",2);
  /* monster */
+ if(E.nm&&E.nm.net){nmNetMon(E,dt,0);hudTxt(E);return}
  E.fT-=dt;if(E.fT<=0){E.fT=.25;E.fld=skField(E.S,E.x,E.y)}
  for(const o of E.mon){
   const dist=Math.hypot(o.x-E.x,o.y-E.y);
@@ -2441,6 +2442,7 @@ function skDraw(E){
  for(const o of E.mon)ents.push({y:o.y,d:()=>{const im=skAssets[o.id];if(!im.naturalWidth)return;const h=o.h*1.0,w=h*im.naturalWidth/im.naturalHeight,ch=o.mode==="chase",bob=Math.sin(E.t*(ch?10:5)+o.t0)*(ch?3:1.5);
   g.save();g.shadowColor=ch?"#ff1f4b":"#000";g.shadowBlur=ch?18:6;g.translate(X(o.x),Y(o.y)+bob*sc);g.scale(-o.f,1);g.drawImage(im,-w/2*sc,-h*sc,w*sc,h*sc);g.restore();
   g.fillStyle=ch?"#ff6a85":"#d9c9e0";g.font="700 10px sans-serif";g.textAlign="center";g.fillText(o.n,X(o.x),Y(o.y-h)-3)}});
+ if(E.nm&&E.nm.net)nmNetEnts(E,ents,g,X,Y,sc);
  ents.sort((a,b)=>a.y-b.y).forEach(e=>e.d());
  if(E.game){ /* Horror Mode: gelap, kabut, lampu berkedip, senter */
   const Z2=E.S.Z,px=X(E.x),py=Y(E.y-48),R0=270*sc;
@@ -2612,16 +2614,16 @@ const _skT=skTick;skTick=function(E,dt){if(E.nm)nmTick(E,dt);else _skT(E,dt)};
 const _skM=skMsg;skMsg=function(E,t,s){if(E&&E.nm&&/Portal terkunci|Jimat/.test(t))return;_skM(E,t,s)};
 const _skL=skLose;skLose=function(E,o){if(E.nm)nmCaught(E,o);else{nmScare(E,o);_skL(E,o)}};
 function nmTick(E,dt){const N=E.nm,d=N.d,z=N.zone,b=N.buff;if(N.over){_skT(E,dt);return}
- N.t+=dt;for(const k in b)if(b[k]<=N.t)delete b[k];
+ N.t+=dt;if(N.net)nmNetPre(E);for(const k in b)if(b[k]<=N.t)delete b[k];
  E.cv.style.filter=b.dist?"hue-rotate(80deg) blur(1.3px) contrast(1.5)":b.stun?"grayscale(.8) blur(1px)":"";
- for(const o of E.mon){if(o.vr0==null)o.vr0=o.vr;o.vr=o.vr0*(b.alert?3:1)*(z.phase==="warn"?1.5:1)}
+ for(const o of E.mon){if(o.vr0==null)o.vr0=o.vr;o.vr=o.vr0*((b.alert||N.aln)?3:1)*(z.phase==="warn"?1.5:1)}
  const S0=E.state;
  if(S0==="cd"){N.cd-=dt;if(N.cd<=0){E.state="play";skMsg(E,"🌙 Obake bangun! Cari SAFE ZONE!",3)}}
  else{
   if(S0==="caught"){N.rez-=dt;if(N.rez<=0)nmRevive(E)}
-  z.t-=dt;
-  if(z.phase==="open"&&z.t<=0){z.phase="warn";z.t=d.w;skMsg(E,"⚠️ Safe Zone ditutup! Pindah ke "+z.nxt.n+" — Obake mulai mengejar!",4)}
-  else if(z.phase==="warn"&&z.t<=0){N.cycle++;if(N.cycle>=d.n){nmFinish(E);return}z.prev=z.cur;z.cur=z.nxt;z.nxt=N.pick([z.cur,z.prev]);E.M.safe=[z.cur.x,z.cur.y];z.phase="open";z.t=d.z;N.got=0;if(N.traps)N.traps.forEach(t=>t.on=1);skMsg(E,"🟢 Safe Zone "+(N.cycle+1)+"/"+d.n+": "+z.cur.n+" — Obake kembali memburu!",3.5)}}
+  z.t-=dt;if(N.fol&&z.t<.01)z.t=.01;
+  if(!N.fol&&z.phase==="open"&&z.t<=0){z.phase="warn";z.t=d.w;skMsg(E,"⚠️ Safe Zone ditutup! Pindah ke "+z.nxt.n+" — Obake mulai mengejar!",4)}
+  else if(!N.fol&&z.phase==="warn"&&z.t<=0){N.cycle++;if(N.cycle>=d.n){nmFinish(E);return}z.prev=z.cur;z.cur=z.nxt;z.nxt=N.pick([z.cur,z.prev]);E.M.safe=[z.cur.x,z.cur.y];z.phase="open";z.t=d.z;N.got=0;if(N.traps)N.traps.forEach(t=>t.on=1);skMsg(E,"🟢 Safe Zone "+(N.cycle+1)+"/"+d.n+": "+z.cur.n+" — Obake kembali memburu!",3.5)}}
  const inZ=z.phase==="open"&&E.state==="play"&&Math.hypot(E.M.safe[0]-E.x,E.M.safe[1]-E.y)<58;
  N.hide=inZ;
  if(inZ){E.inv=Math.max(E.inv,.3);N.stam=Math.min(100,N.stam+20*dt);if(!N.got){N.got=1;N.reached++;const bn=100+Math.round(z.t*2);N.pts+=bn;skMsg(E,"🛡️ SAFE ZONE tercapai! +"+bn+" · Obake pergi, tunggu zona berpindah",3.5)}}
@@ -2633,7 +2635,7 @@ function nmTick(E,dt){const N=E.nm,d=N.d,z=N.zone,b=N.buff;if(N.over){_skT(E,dt)
  NM_IN=1;_skT(E,dt);NM_IN=0;E.vx=sv[0];E.vy=sv[1];E.keys=sv[2];
  if(E.state==="play"&&mov){const f=(mult-1)*190*dt/Math.max(1,m0),n=Math.max(1,Math.ceil(Math.hypot(dx0*f,dy0*f)/8)),vx=dx0*f/n,vy=dy0*f/n;for(let i=0;i<n;i++){if(skOk(E.S,E.x+vx,E.y+vy,7)){E.x+=vx;E.y+=vy}else if(skOk(E.S,E.x+vx,E.y,7))E.x+=vx;else if(skOk(E.S,E.x,E.y+vy,7))E.y+=vy;else break}}
  N.acc+=Math.hypot(E.x-px,E.y-py);
- if(E.state==="play"&&N.traps&&!b.god)for(const t of N.traps)if(t.on&&Math.hypot(t.x-E.x,t.y-E.y)<24){t.on=0;const T=NMTR[t.k];T[1](N);N.pts-=5;nmPop(T[0],"#ffb347");try{snd(140)}catch(e){}N.hurtT=N.t+.8}
+ if(E.state==="play"&&N.traps&&!b.god)for(const t of N.traps)if(t.on&&Math.hypot(t.x-E.x,t.y-E.y)<24){t.on=0;if(N.net){(N.trh=N.trh||[]).push(N.traps.indexOf(t));N.trc=N.cycle}const T=NMTR[t.k];T[1](N);N.pts-=5;nmPop(T[0],"#ffb347");try{snd(140)}catch(e){}N.hurtT=N.t+.8}
  if(E.state==="play"){if(!N.q){N.qc-=dt;if(N.acc>d.g&&N.qc<=0)nmAsk(E)}else{N.q.t-=dt;const s=$("nmqt");if(s)s.textContent=Math.max(0,Math.ceil(N.q.t));if(N.q.t<=0)nmAnswer(E,null,1)}}
  nmHud(E)}
 function nmHud(E){const h=$("skhud");if(!h)return;const N=E.nm,z=N.zone,b=N.buff,ar=a=>["➡️","↘️","⬇️","↙️","⬅️","↖️","⬆️","↗️"][(Math.round(a/(Math.PI/4))%8+8)%8];
@@ -2926,6 +2928,123 @@ const _gkE=nmEntry;nmEntry=function(){GKL.menu="role";try{return _gkE.apply(this
 const _gkJ=nmRole;nmRole=function(){GKL.menu="join";try{return _gkJ.apply(this,arguments)}finally{GKL.menu=0}};
 const _gkL=nmLobby;nmLobby=function(){GKL.menu="lobby";try{const r=_gkL.apply(this,arguments);if(NMS.st==="STARTING")gkPre(1);else gkPre(0);return r}finally{GKL.menu=0}};
 const _gkP=skPlay;skPlay=function(mode){if(mode==="game")gkPre(0);return _gkP.apply(this,arguments)};
+
+/* =====================================================================
+   UPDATE 3 — GAKKOU OBAKE ESCAPE: CO-OP REAL-TIME (satu room = satu dunia)
+   Memakai infrastruktur yang sudah ada (room presence hub MQTT/claude.ai) dan zona NM<hash kode room>.
+   - Posisi, arah, animasi, status (hidup/tertangkap/spectator), Safe Zone, jebakan tiap pemain dikirim lewat presence (key "k..").
+   - Obake, timer Safe Zone, siklus & penutupan game disimulasikan SATU kali oleh "sim host"
+     (Sensei; jika Sensei putus, pemain tertua yang masih terhubung mengambil alih) dan diikuti semua perangkat.
+   - Kondisi tersimpan di sessionStorage agar pemain yang reconnect kembali ke room, posisi, dan skor yang sama.
+   Key presence (maks 3 huruf kecil): kp id pemain, kx/ky posisi, kf arah, ka berjalan, ks status(0 main,1 tertangkap,2 spectator,3 selesai,4 hitung mundur),
+   kz di Safe Zone, kc karakter, ki kebal, kt kena jebakan, kms/kal sisa buff Obake lambat/lonceng, ktr jebakan terpicu, kpt poin,
+   ko posisi Obake (host), kh status Safe Zone/siklus (host).
+   ===================================================================== */
+const NMN={iv:0,on:0,peers:new Map(),pt:0,simT:0,imgs:{},lj:"",rt:0};
+function nmPlList(){const o=[],s=NMS.pl||"";for(let i=0;i+11<=s.length;i+=11)o.push(s.substr(i,11));return o}
+/* sim host: Sensei jika terhubung; kalau tidak, pemain terhubung dengan waktu gabung paling awal (deterministik di semua perangkat) */
+function nmSimHost(){const c=nmPlList().filter(p=>p===nmPid||(NMS.known[p]&&!NMS.known[p].dc&&!NMS.known[p].lv)).map(p=>NMS.known[p]||{pid:p,role:"player",ts:0});
+ c.sort((a,b)=>((b.role==="sensei")-(a.role==="sensei"))||((a.ts||0)-(b.ts||0))||(a.pid<b.pid?-1:1));return c.length?c[0].pid:nmPid}
+/* peer lain di zona room yang sama (dibaca dari presence hub), di-cache 40 ms */
+function nmNetPeers(){const n=performance.now();if(n-NMN.pt<40)return NMN.peers;NMN.pt=n;let ps=[];try{ps=NMS.rm?NMS.rm.peers():[]}catch(e){}
+ const m=NMN.peers,seen=new Set();
+ for(const p of ps){const pr=p&&p.presence;if(!pr||pr.s!==NMS.zone||typeof pr.kp!=="string"||pr.kp===nmPid||pr.kp.length>11)continue;
+  const id=pr.kp;seen.add(id);let o=m.get(id);if(!o){o={id,x:null,y:null,tx:null,ty:null,f:1,mv:0,st:0,c:"",n:"Pemain",seen:0,pr:{}};m.set(id,o)}
+  if(typeof pr.kx==="number"&&typeof pr.ky==="number"){o.tx=pr.kx;o.ty=pr.ky}
+  o.f=pr.kf<0?-1:1;o.mv=pr.ka?1:0;o.st=pr.ks|0;o.c=typeof pr.kc==="string"?pr.kc:"";o.n=typeof pr.n==="string"&&pr.n?pr.n:o.n;
+  o.seen=p.seenAt||p.updatedAt||Date.now();o.pr=pr}
+ for(const id of [...m.keys()])if(!seen.has(id))m.delete(id);
+ return m}
+function nmNetInit(E,sid){const N=E.nm;N.net=1;N.fol=true;N.simHost="";N.trh=[];N.trc=0;N.sidTag=String(sid).slice(-4);N.adopt=0;
+ NMN.peers=new Map();NMN.pt=0;NMN.simT=0;NMN.lj="";NMN.on=1;
+ /* posisi awal tersebar tipis supaya karakter tidak menumpuk persis */
+ const ix=Math.max(0,nmPlList().indexOf(nmPid)),ox=(ix%5-2)*20,oy=(Math.floor(ix/5)%4)*16;try{if(skOk(E.S,E.x+ox,E.y+oy,7)){E.x+=ox;E.y+=oy}}catch(e){}
+ nmNetRestore(E,sid);
+ clearInterval(NMN.iv);let k=0;NMN.iv=setInterval(()=>{if(SK!==E||!NMS.code||!NMS.rm){nmNetStop();return}nmNetSend(E);nmNetSave(E);if(++k%9===0)nmNetHud(E)},110);nmNetHud(E)}
+function nmNetStop(){const was=NMN.on||NMN.iv;clearInterval(NMN.iv);NMN.iv=0;NMN.on=0;NMN.peers=new Map();NMN.lj="";
+ if(was){const r=NMS.rm;try{r&&r.presence({kp:null,kx:null,ky:null,kf:null,ka:null,ks:null,kz:null,kc:null,ki:null,kt:null,kms:null,kal:null,ktr:null,kpt:null,ko:null,kh:null})}catch(e){}}}
+function nmNetSend(E){const N=E.nm;if(!N||!N.net||!NMS.rm)return;const s=E.state;
+ const p={kp:nmPid,kx:Math.round(E.x),ky:Math.round(E.y),kf:E.f<0?-1:1,ka:E.moving?1:0,ks:s==="caught"?1:s==="spec"?2:s==="over"?3:s==="cd"?4:0,kz:N.hide?1:0,kc:String(E.me||"").slice(0,40),ki:E.inv>0?1:0,
+  kt:N.hurtT&&N.hurtT>N.t?1:0,kms:Math.max(0,Math.round(((N.buff.mslow||0)-N.t)*10)/10),kal:Math.max(0,Math.round(((N.buff.alert||0)-N.t)*10)/10),
+  ktr:N.trh&&N.trh.length?(N.trc+":"+N.trh.join(".")).slice(0,60):"",kpt:Math.round(N.pts)};
+ if(!N.fol){const z=N.zone;p.ko=E.mon.map(o=>Math.round(o.x)+","+Math.round(o.y)+","+(o.f<0?0:1)+","+(o.mode==="chase"?1:0)).join(";");
+  p.kh=[N.sidTag,N.cycle,z.phase==="open"?0:1,Math.max(0,z.t).toFixed(1),N.cands.indexOf(z.cur),N.cands.indexOf(z.nxt),N.over?1:0].join("|")}
+ else{p.ko="";p.kh=""}
+ const j=JSON.stringify(p);if(j===NMN.lj)return;NMN.lj=j;try{const r=NMS.rm.presence(p);r&&r.catch&&r.catch(()=>{})}catch(e){}}
+/* terapkan status dari sim host: posisi Obake, Safe Zone, siklus, akhir game */
+function nmNetApply(E,pr,first){const N=E.nm,z=N.zone;
+ if(typeof pr.ko==="string"&&pr.ko){const a=pr.ko.split(";");for(let i=0;i<E.mon.length&&i<a.length;i++){const v=a[i].split(","),o=E.mon[i],x=+v[0],y=+v[1];if(!isFinite(x)||!isFinite(y))continue;
+  o.tx=x;o.ty=y;o.f2=v[2]==="0"?-1:1;o.m2=v[3]==="1"?"chase":"patrol";if(first||!o.gn||isNaN(o.x)){o.gn=1;o.x=x;o.y=y}}}
+ if(typeof pr.kh==="string"&&pr.kh){const a=pr.kh.split("|");if(a.length<7||a[0]!==N.sidTag)return;
+  const cy=+a[1],ph=+a[2]?"warn":"open",zt=+a[3],ci=+a[4],ni=+a[5],fin=+a[6];if(!isFinite(cy)||!isFinite(zt))return;
+  const nc=N.cands[ci],nn=N.cands[ni];
+  if(nc&&nn){const cyc=cy!==N.cycle;
+   if(cyc){N.cycle=cy;N.got=0;if(N.traps)N.traps.forEach(t=>t.on=1);N.trh=[];z.prev=z.cur}
+   z.cur=nc;z.nxt=nn;E.M.safe=[nc.x,nc.y];
+   if(ph!==z.phase||cyc){z.phase=ph;if(!first){if(cyc&&ph==="open")skMsg(E,"🟢 Safe Zone "+(cy+1)+"/"+N.d.n+": "+nc.n+" — Obake kembali memburu!",3.5);else if(ph==="warn")skMsg(E,"⚠️ Safe Zone ditutup! Pindah ke "+nn.n+" — Obake mulai mengejar!",4)}}
+   z.t=zt}
+  if(fin&&!N.over&&!first)nmFinish(E)}}
+/* dipanggil tiap frame di awal nmTick: tentukan sim host, ikuti host, gabungkan jebakan & buff pemain lain */
+function nmNetPre(E){const N=E.nm,n=performance.now();
+ if(n-NMN.simT>400){NMN.simT=n;const h=nmSimHost(),was=N.fol;N.simHost=h;N.fol=h!==nmPid;if(was&&!N.fol)N.adopt=0}
+ if(N.trc!==N.cycle){N.trc=N.cycle;N.trh=[]}
+ const m=nmNetPeers(),now=Date.now();let ms=0,al=0;
+ for(const o of m.values()){const pr=o.pr;if(now-o.seen>6000)continue;if(pr.kms>0)ms=1;if(pr.kal>0)al=1;
+  if(typeof pr.ktr==="string"&&pr.ktr){const i=pr.ktr.indexOf(":");if(i>0&&+pr.ktr.slice(0,i)===N.cycle)for(const q of pr.ktr.slice(i+1).split(".")){if(q==="")continue;const t=N.traps&&N.traps[+q];if(t&&t.on)t.on=0}}}
+ N.msn=ms;N.aln=al;
+ if(N.fol){const h=m.get(N.simHost);if(h)nmNetApply(E,h.pr,0)}
+ else if(!N.adopt){N.adopt=1;let best=null;for(const o of m.values())if(typeof o.pr.kh==="string"&&o.pr.kh&&(!best||o.seen>best.seen))best=o;if(best)nmNetApply(E,best.pr,1)}}
+/* Obake: host mensimulasikan (mengejar pemain terdekat yang hidup & tidak di Safe Zone), semua perangkat mengikuti + cek tabrakan lokal */
+function nmNetMon(E,dt,pas){const N=E.nm,m=nmNetPeers();
+ if(!N.fol){
+  if(E.state!=="cd"&&!N.over){
+   const T=[];if(E.state==="play")T.push({id:nmPid,x:E.x,y:E.y,hide:!!N.hide});
+   const now=Date.now();for(const o of m.values()){if(o.tx==null||o.st!==0||now-o.seen>6000)continue;T.push({id:o.id,x:o.tx,y:o.ty,hide:o.pr.kz===1})}
+   const hd=T.some(t=>t.hide);N.fT=(N.fT||0)-dt;const rf=N.fT<=0;if(rf)N.fT=.25;
+   for(const o of E.mon){let tg=null,td=1e9;for(const t of T){if(t.hide)continue;const d=Math.hypot(o.x-t.x,o.y-t.y);if(d<td){td=d;tg=t}}
+    const ch=!!tg&&td<(o.mode==="chase"?o.vr*1.5:o.vr);o.mode=ch?"chase":"patrol";if(!hd)o.ho=0;
+    const sp=o.v*(ch?1.12:.62)*skPace(E,o,ch,dt);
+    if(ch){if(rf||o.tgi!==tg.id||!o.tf){o.tf=skField(E.S,tg.x,tg.y);o.tgi=tg.id}skStep(E.S,o,o.tf,dt,sp)}
+    else{if(!o.wp||Math.hypot(o.wp[0]-o.x,o.wp[1]-o.y)<22||(hd&&!o.ho)){o.ho=hd?1:0;let w;for(let k=0;k<90;k++){const c=E.S.g.length*Math.random()|0;if(E.S.g[c]){const cw=[(c%GW)*CELL+CELL/2,(c/GW|0)*CELL+CELL/2];if(hd&&k<80&&Math.hypot(cw[0]-E.M.safe[0],cw[1]-E.M.safe[1])<700)continue;w=cw;break}}o.wp=w||[E.M.sp[0],E.M.sp[1]];o.fld=skField(E.S,o.wp[0],o.wp[1])}
+     skStep(E.S,o,o.fld,dt,sp)}}}
+ }else{const k=Math.min(1,dt*10);for(const o of E.mon){if(o.tx==null)continue;if(isNaN(o.x)||Math.hypot(o.tx-o.x,o.ty-o.y)>400){o.x=o.tx;o.y=o.ty}else{o.x+=(o.tx-o.x)*k;o.y+=(o.ty-o.y)*k}o.f=o.f2||1;o.mode=o.m2||"patrol"}}
+ if(pas||E.state!=="play")return;
+ for(const o of E.mon){const dist=Math.hypot(o.x-E.x,o.y-E.y);
+  if(o.mode==="chase"&&dist<o.vr&&!o.warn){o.warn=1;skMsg(E,"⚠️ "+o.n+": “"+o.say0+"”",2.2)}if(o.mode!=="chase")o.warn=0;
+  if(dist<o.vc/2.6&&E.inv<=0){E.hp--;E.inv=2;E.flash=.5;try{snd(120)}catch(e){}skMsg(E,"💀 "+o.n+" menyerangmu!",1.6);if(E.hp<=0){skLose(E,o);return}}}}
+/* gambar pemain lain di dunia yang sama (urut Y bersama entitas lain) */
+function nmNetEnts(E,ents,g,X,Y,sc){const m=nmNetPeers(),now=performance.now();
+ for(const o of m.values()){if(o.tx==null)continue;const kn=NMS.known[o.id];if(kn&&kn.lv)continue;
+  const dt=Math.min(.1,(now-(o.lt||now))/1000);o.lt=now;
+  if(o.x==null||Math.hypot(o.tx-o.x,o.ty-o.y)>350){o.x=o.tx;o.y=o.ty}else{const k=Math.min(1,dt*11);o.x+=(o.tx-o.x)*k;o.y+=(o.ty-o.y)*k}
+  const mv=Math.hypot(o.tx-o.x,o.ty-o.y)>2||o.mv;
+  ents.push({y:o.y,d:()=>{const pr=o.pr,stale=Date.now()-o.seen>6000;let im=NMN.imgs[o.c];if(!im){im=NMN.imgs[o.c]=skImg(IMG[o.c]||E.pimg.src)}if(!im.naturalWidth)return;
+   const h=96,w=h*im.naturalWidth/im.naturalHeight,bob=mv?Math.abs(Math.sin(E.t*14+o.tx))*3:0;
+   g.save();g.globalAlpha=(stale||o.st===2)?.35:1;if(pr.ki&&Math.floor(E.t*14)%2)g.globalAlpha*=.4;
+   g.translate(X(o.x),Y(o.y-bob));g.scale(o.f,1);if(o.st===1)g.rotate(1.45);else if(pr.kt)g.rotate(Math.sin(E.t*14)*.14);g.drawImage(im,-w/2*sc,-h*sc,w*sc,h*sc);g.restore();
+   g.save();g.fillStyle="#9ff";g.font="700 11px sans-serif";g.textAlign="center";g.fillText((stale?"⚫ ":"")+(o.st===2?"👻 ":"")+(pr.kz?"🛡️ ":"")+(pr.kt?"💫 ":"")+o.n,X(o.x),Y(o.y-h)-4);g.restore()}})}}
+/* daftar anggota di HUD game */
+function nmNetHud(E){const st=$("skst");if(!st||!E.nm)return;let b=$("nmros");if(!b){st.insertAdjacentHTML("beforeend",'<div id="nmros" style="position:absolute;left:6px;top:46px;z-index:3;pointer-events:none;font-size:11px;line-height:1.35;color:#fff;text-shadow:0 1px 2px #000;max-width:40%"></div>');b=$("nmros")}
+ const m=nmNetPeers(),now=Date.now(),L=nmPlList(),row=[];
+ for(const pid of L){const k=NMS.known[pid]||{},nm=esc((k.name||"Pemain").slice(0,10));let ic;
+  if(pid===nmPid)ic=E.state==="caught"?"😱":E.state==="spec"?"👻":"🟢";
+  else{const o=m.get(pid);if(k.lv||(k.dc&&!o))ic="⚫";else if(!o||now-o.seen>6000)ic="⚫";else ic=o.st===1?"😱":o.st===2?"👻":"🟢"}
+  row.push(ic+" "+nm+(pid===nmPid?" (kamu)":""))}
+ b.innerHTML=row.slice(0,8).join("<br>")+(row.length>8?"<br>+"+(row.length-8)+" lainnya":"")}
+/* simpan & pulihkan status sesi (reconnect) */
+function nmNetSave(E){const N=E.nm;try{sessionStorage.setItem("gk-nm-st",JSON.stringify({sid:NMS.sid,code:NMS.code,role:NMS.role,pl:NMS.pl,cfg:NMS.cfg,x:Math.round(E.x),y:Math.round(E.y),s:E.state,pts:Math.round(N.pts),ok:N.ok,bad:N.bad,rc:N.reached,cg:N.caught,at:Date.now()}))}catch(e){}}
+function nmNetRestore(E,sid){const N=E.nm;try{const s=JSON.parse(sessionStorage.getItem("gk-nm-st")||"null");if(!s||s.sid!==sid||s.code!==NMS.code||Date.now()-s.at>180000||s.s==="over")return;
+ E.x=s.x;E.y=s.y;N.pts=s.pts||0;N.ok=s.ok||0;N.bad=s.bad||0;N.reached=s.rc||0;N.caught=s.cg||0;N.cd=0;E.state=s.s==="spec"?"spec":s.s==="caught"?"caught":"play";if(E.state==="caught")N.rez=8;
+ skMsg(E,"🔄 Tersambung kembali ke room "+NMS.code,2.8)}catch(e){}}
+/* ---- pasang ke sistem yang ada (tanpa menghapus apa pun) ---- */
+const _nmRunU3=nmRun;nmRun=function(cfg,room){const r=_nmRunU3.apply(this,arguments);const E=SK;if(E&&E.nm)nmNetInit(E,room);return r};
+const _skStopU3=skStop;skStop=function(){nmNetStop();return _skStopU3.apply(this,arguments)};
+const _nmExitU3=nmExit;nmExit=function(){nmNetStop();try{sessionStorage.removeItem("gk-nm-st")}catch(e){}return _nmExitU3.apply(this,arguments)};
+/* Sensei yang reload saat game berjalan: lanjutkan game di room & sesi yang sama (bukan room baru) */
+const _nmResU3=nmResume;nmResume=async function(a){await _nmResU3.apply(this,arguments);const ok=!!(a&&NMS.rm&&NMS.code===a.code);
+ try{const s=JSON.parse(sessionStorage.getItem("gk-nm-st")||"null");
+  if(ok&&a&&a.role==="sensei"&&s&&s.code===a.code&&s.sid&&s.s!=="over"&&Date.now()-s.at<180000&&!SK){NMS.sid=s.sid;NMS.sidRun=s.sid;NMS.pl=s.pl||"";NMS.cfg=s.cfg||NMS.cfg;NMS.st="PLAYING";NMS.starting=1;NMS.locked=1;nmPub();nmRun(NMS.cfg,s.sid)}}catch(e){}
+ return ok};
 </script>
 </body>
 </html>
