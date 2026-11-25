@@ -24,6 +24,14 @@ main{position:relative;max-width:520px;margin:0 auto;padding:16px}
 h2{font-size:20px;margin:4px 0 10px;text-align:center;color:#e0207f}
 button{font:inherit;cursor:pointer;border:2px solid #ff2d95;background:#fff;color:var(--tx);border-radius:14px;padding:12px 14px;box-shadow:0 3px 0 #ff2d95}
 button:active{transform:translateY(2px);box-shadow:0 1px 0 #ff2d95}
+.mwg{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mwg button{padding:10px 8px;font-weight:700;font-size:15px}
+.mwin{width:100%;display:block;font-size:20px;padding:14px;text-align:center;border:3px solid #ff2d95;border-radius:16px;background:#fff;color:var(--tx);box-shadow:0 3px 0 #ff2d95;font-family:"Noto Sans JP",system-ui,sans-serif}
+.mwin:focus{outline:none;border-color:#e0207f;box-shadow:0 3px 0 #e0207f,0 0 0 4px rgba(255,45,149,.25)}
+.mwin.mwok{background:var(--okb);border-color:#2aa04a;box-shadow:0 3px 0 #2aa04a}.mwin.mwno{background:var(--nob);border-color:#e0207f}
+.mwq2{font-size:30px;font-weight:700;color:var(--tx);word-break:break-word;font-family:"Zen Maru Gothic","Noto Sans JP",sans-serif}
+.mwans{margin-top:8px;padding:10px 12px;background:#fff;border:2px dashed #ff2d95;border-radius:14px;font-size:15px;line-height:1.6}
+.mwrec{display:grid;gap:8px}.mwr{background:#fff;border:2px solid #ff2d95;border-radius:14px;padding:8px 12px;font-size:14px;text-align:left}
+.mwr.ok{border-color:#2aa04a;background:var(--okb)}.mwr.no{border-color:#e0207f;background:var(--nob)}.mwr span{float:right;font-weight:700}
 button:disabled{opacity:.5;cursor:not-allowed}
 .pri{background:#ff2d95;border-color:#ff2d95;color:#fff;box-shadow:0 4px 0 #b8106a}
 .c{text-align:center}.sm{font-size:13px;color:var(--mut)}
@@ -1396,7 +1404,496 @@ JR|ジェイアール|JR (perusahaan rel kereta listrik)|
 うれしい|うれしい|senang|
 嫌|いや|tidak senang, tidak suka (kata sifat-na)|
 すると|すると|kemudian|
-目が覚めます|めがさめます|bangun, sadar|`};
+目が覚めます|めがさめます|bangun, sadar|`,
+31:`続けます|つづけます|melanjutkan|
+見つけます|みつけます|menemukan|🔍
+取ります|とります|mengambil (休みを〜: cuti)|
+受けます|うけます|mengikuti (試験を〜: ujian)|
+申し込みます|もうしこみます|mendaftar|
+休憩します|きゅうけいします|beristirahat|☕
+連休|れんきゅう|liburan berturutan|
+作文|さくぶん|karangan|📝
+発表|はっぴょう|presentasi (〜します: mempresentasikan)|
+展覧会|てんらんかい|pameran|🖼️
+結婚式|けっこんしき|upacara pernikahan|💒
+お葬式|おそうしき|upacara kematian|
+式|しき|upacara|
+本社|ほんしゃ|kantor pusat|🏢
+支店|してん|kantor cabang|
+教会|きょうかい|gereja|⛪
+大学院|だいがくいん|Program S2, S3 Universitas|🎓
+動物園|どうぶつえん|kebun binatang|🦁
+温泉|おんせん|tempat pemandian air panas|♨️
+帰り|かえり|pulang|
+お子さん|おこさん|anak orang lain|
+〜号|〜ごう|nomor 〜 (nomor yang dipakai untuk kereta, angin topan dan lain-lain)|
+〜の方|〜のほう|sebelah 〜|
+ずっと|ずっと|seterusnya|
+残ります|のこります|tinggal|
+入学試験|にゅうがくしけん|ujian masuk|
+月に|つきに|dalam sebulan|
+村|むら|desa, kampung|🏘️
+卒業します|そつぎょうします|lulus, tamat|
+映画館|えいがかん|gedung bioskop|🎬
+嫌|いや|tidak senang, tidak suka (kata sifat-na)|
+空|そら|langit|
+閉じます|とじます|tutup|
+都会|とかい|kota besar|🌆
+子どもたち|こどもたち|anak-anak|
+自由に|じゆうに|dengan bebas|`,
+32:`運動します|うんどうします|berolahraga|🏃
+成功します|せいこうします|berhasil|🎉
+失敗します|しっぱいします|gagal (試験に〜: ujian)|
+合格します|ごうかくします|lulus (試験に〜: ujian)|💯
+やみます|やみます|berhenti (雨が〜: hujan)|
+晴れます|はれます|cerah|☀️
+曇ります|くもります|mendung|☁️
+続きます|つづきます|berlangsung (熱が〜: demam)|
+ひきます|ひきます|masuk (かぜを〜: angin)|
+冷やします|ひやします|mendinginkan|🧊
+込みます|こみます|macet (道が〜: jalan)|
+すきます|すきます|sepi (道が〜: jalan)|
+出ます|でます|mengikutsertakan (試合に〜: pertandingan), menghadiri (パーティーに〜: pesta)|
+無理をします|むりをします|memaksakan diri|
+十分|じゅうぶん|dengan cukup (kata sifat-na)|
+おかしい|おかしい|aneh, menarik|
+うるさい|うるさい|bising|
+先生|せんせい|dokter|
+やけど|やけど|luka bakar (〜をします: menderita luka bakar)|🔥
+けが|けが|luka (〜をします: terluka)|🩹
+せき|せき|batuk (〜をします/〜がでます: batuk)|
+インフルエンザ|インフルエンザ|influenza|🤒
+空|そら|langit|
+太陽|たいよう|matahari|🌞
+星|ほし|bintang|⭐
+風|かぜ|angin|🌬️
+東|ひがし|timur|
+西|にし|barat|
+南|みなみ|selatan|
+北|きた|utara|
+国際〜|こくさい〜|internasional 〜|
+水道|すいどう|air PAM|🚰
+エンジン|エンジン|mesin|
+チーム|チーム|regu|
+今夜|こんや|nanti malam, malam ini|🌙
+夕方|ゆうがた|sore|🌇
+まえ|まえ|sebelum|
+遅く|おそく|kemalaman|
+こんなに|こんなに|begini|
+そんなに|そんなに|begitu (mengenai barang atau hal tentang lawan bicara)|
+あんなに|あんなに|begitu (mengenai barang atau hal tentang tidak ada hubungan dengan pembicara dan lawan bicara)|
+ヨーロッパ|ヨーロッパ|Eropa|🌍
+元気|げんき|sehat|
+胃|い|lambung|
+ストレス|ストレス|stres|😣
+それはいけませんね|それはいけませんね|Kurang bagus.|
+星占い|ほしうらない|horoskop|🔮
+牡牛座|おうしざ|Taurus|♉
+働きすぎ|はたらきすぎ|terlalu banyak pekerjaan|
+困ります|こまります|bingung|
+宝くじ|たからくじ|lotre|🎟️
+当たります|あたります|memenangi (宝くじが〜: lotre)|
+健康|けんこう|kesehatan|
+恋愛|れんあい|asmara|💕
+恋人|こいびと|pacar|💑
+ラッキーアイテム|ラッキーアイテム|benda yang mujur|🍀
+石|いし|batu|`,
+33:`逃げます|にげます|berlari|
+騒ぎます|さわぎます|menghebohkan|
+あきらめます|あきらめます|putus asa|
+投げます|なげます|melempar|
+守ります|まもります|menjaga|🛡️
+始まります|はじまります|dimulai (式が〜: upacara)|
+出席します|しゅっせきします|menghadiri (会議に〜: rapat)|
+伝えます|つたえます|menyampaikan|
+注意します|ちゅういします|berhati-hati (車に〜: pada mobil)|⚠️
+外します|はずします|meninggalkan (席を〜: tempat)|
+戻ります|もどります|kembali|
+あります|あります|ada (電話が〜: telepon)|📞
+リサイクルします|リサイクルします|mendaur ulang|♻️
+だめ|だめ|tidak baik (kata sifat-na)|
+同じ|おなじ|sama|
+警察|けいさつ|polisi|👮
+席|せき|tempat, kursi|💺
+マーク|マーク|tanda, cap|
+ボール|ボール|bola|⚽
+締め切り|しめきり|batas waktu|
+規則|きそく|peraturan|
+危険|きけん|bahaya|🚨
+使用禁止|しようきんし|dilarang pakai|🚫
+立入禁止|たちいりきんし|dilarang masuk|⛔
+徐行|じょこう|berjalan perlahan-lahan|🐢
+入口|いりぐち|pintu masuk|
+出口|でぐち|pintu keluar|
+非常口|ひじょうぐち|pintu darurat|🆘
+無料|むりょう|gratis, cuma-cuma|🆓
+割引|わりびき|diskon|🏷️
+飲み放題|のみほうだい|minum sepuasnya|🥤
+使用中|しようちゅう|sedang dipakai|
+募集中|ぼしゅうちゅう|sedang dicari|
+〜中|〜ちゅう|sedang 〜|
+どういう〜|どういう〜|bagaimana 〜|
+いくら[〜ても]|いくら[〜ても]|bagaimana pun|
+もう|もう|lagi (digunakan bersama dengan bentuk negatif)|
+あと〜|あと〜|sisa 〜|
+〜ほど|〜ほど|kira-kira 〜|
+駐車違反|ちゅうしゃいはん|pelanggaran lalu lintas|🚗
+罰金|ばっきん|denda|💴
+地震|じしん|gempa bumi|
+起きます|おきます|terjadi|
+助け合います|たすけあいます|bantu-membantu|🤝
+もともと|もともと|memang|
+悲しい|かなしい|sedih|😢
+もっと|もっと|lebih|
+あいさつ|あいさつ|salam (〜をします: memberi salam sepatah kata pada)|
+相手|あいて|kawan, pasangan|
+気持ち|きもち|perasaan|`,
+34:`磨きます|みがきます|menggosok (歯を〜: gigi)|🪥
+組み立てます|くみたてます|memasang|
+折ります|おります|melipat|
+気がつきます|きがつきます|teringat (忘れ物に〜: barang ketinggalan)|
+つけます|つけます|membubuhkan (しょうゆを〜: kecap asin)|
+見つかります|みつかります|ditemukan (かぎが〜: kunci)|🔑
+質問します|しつもんします|bertanya|
+さします|さします|memakai (傘を〜: payung), berpayung|☂️
+スポーツクラブ|スポーツクラブ|sports club|
+お城|おしろ|istana|🏯
+説明書|せつめいしょ|petunjuk|
+図|ず|gambar|
+線|せん|garis|
+矢印|やじるし|tanda panah (aksara)|➡️
+黒|くろ|hitam (kata benda)|⚫
+白|しろ|putih (kata benda)|⚪
+赤|あか|merah (kata benda)|🔴
+青|あお|biru (kata benda)|🔵
+紺|こん|biru tua (kata benda)|
+黄色|きいろ|kuning (kata benda)|🟡
+茶色|ちゃいろ|coklat (kata benda)|🟤
+しょうゆ|しょうゆ|kecap asin|
+ソース|ソース|kecap Inggris, kecap saos putih|🥫
+お客さん|おきゃくさん|tamu|
+〜か〜|〜か〜|〜 atau 〜|
+ゆうべ|ゆうべ|tadi malam|
+さっき|さっき|tadi|
+茶道|さどう|upacara teh|🍵
+お茶をたてます|おちゃをたてます|membuat teh pada upacara minum teh|
+先に|さきに|duluan|
+載せます|のせます|memuatkan|
+これでいいですか|これでいいですか|Boleh begini?|
+いかがですか|いかがですか|Bagaimana?|
+苦い|にがい|pahit|
+親子どんぶり|おやこどんぶり|Oyakodonburi (nama menu, daging ayam masak bersama telur dan disiram di atas nasi putih)|🍳
+材料|ざいりょう|bahan|
+〜分|〜ぶん|untuk 〜 (menyatakan jumlah) porsi|
+〜グラム|〜グラム|〜 gram|
+〜個|〜こ|〜 buah (kata bilangan untuk menghitung benda yang kecil)|
+たまねぎ|たまねぎ|bawang bombai|🧅
+4分の1|よんぶんのいち|seperempat (1/4)|
+調味料|ちょうみりょう|bumbu|
+適当な大きさに|てきとうなおおきさに|ukuran sedang|
+なべ|なべ|panci|🍲
+火|ひ|api|🔥
+火にかけます|ひにかけます|memasak, memanaskan, menaruh di atas api|
+煮ます|にます|merebus|
+煮えます|にえます|telah matang|
+どんぶり|どんぶり|mangkuk|🍜
+たちます|たちます|lewat, berlalu|`,
+35:`咲きます|さきます|mekar (花が〜: bunga)|🌸
+変わります|かわります|berubah (色が〜: warna)|
+困ります|こまります|bingung|
+付けます|つけます|memberikan (丸を〜: tanda (benar))|
+治ります|なおります|sembuh (病気が〜: penyakit), membaik (故障が〜: kerusakan) (治ります、直ります)|
+クリックします|クリックします|klik|🖱️
+入力します|にゅうりょくします|mengisi|
+正しい|ただしい|benar|
+向こう|むこう|(di) sana, seberang|
+島|しま|pulau|🏝️
+港|みなと|pelabuhan|⚓
+近所|きんじょ|tetangga|
+屋上|おくじょう|loteng|
+海外|かいがい|luar negeri|🌏
+山登り|やまのぼり|mendaki gunung|⛰️
+歴史|れきし|sejarah|📜
+機会|きかい|kesempatan|
+許可|きょか|izin|
+丸|まる|bulat|⭕
+ふりがな|ふりがな|huruf yang menyatakan cara membaca huruf Kanji|
+設備|せつび|fasilitas|
+レバー|レバー|tuas|
+キー|キー|keyboard, tombol|⌨️
+カーテン|カーテン|gorden, tirai|
+ひも|ひも|tali|
+炊飯器|すいはんき|rice cooker|🍚
+葉|は|daun|🍃
+昔|むかし|dulu|
+もっと|もっと|lebih|
+これで終わりましょう|これでおわりましょう|Mari kita selesai sampai di sini.|
+それなら|それなら|kalau begitu|
+夜行バス|やこうバス|bus malam|🚌
+さあ|さあ|Yaaa... (dipakai ketika kurang mengerti mengenai sesuatu hal)|
+旅行社|りょこうしゃ|agen perjalanan|
+詳しい|くわしい|teliti|
+スキー場|スキーじょう|lapangan ski|⛷️
+草津|くさつ|nama tempat peristirahatan di prefektur Gunma|
+志賀高原|しがこうげん|nama dataran tinggi yang terletak di taman nasional di prefektur Nagano|
+朱|しゅ|merah terang|
+交わります|まじわります|bergaul|
+ことわざ|ことわざ|pepatah|
+関係|かんけい|hubungan|
+仲よくします|なかよくします|bergaul dengan akrab|
+必要|ひつよう|perlu (kata sifat-na)|`,
+36:`遭います|あいます|tertimpa (事故に〜: kecelakaan)|
+貯金します|ちょきんします|menabung|💰
+過ぎます|すぎます|lewat (7時を〜: pukul tujuh)|
+慣れます|なれます|terbiasa (仕事に〜: dengan tugas)|
+腐ります|くさります|busuk (食べ物が〜: makanan)|
+剣道|けんどう|kendo (anggar gaya Jepang)|🥋
+柔道|じゅうどう|judo|🥋
+ラッシュ|ラッシュ|keramaian, kesibukan|
+宇宙|うちゅう|angkasa|🚀
+曲|きょく|musik|🎵
+毎週|まいしゅう|setiap minggu|
+毎月|まいつき|setiap bulan|
+毎年|まいとし|setiap tahun (まいねん)|
+このごろ|このごろ|akhir-akhir ini|
+やっと|やっと|akhirnya|
+かなり|かなり|cukup|
+必ず|かならず|pasti|
+絶対に|ぜったいに|mutlak|
+上手に|じょうずに|dengan pandai|
+できるだけ|できるだけ|sedapat mungkin|
+ほとんど|ほとんど|sebagian besar|
+お客様|おきゃくさま|tamu (Kata Hormat dari おきゃくさん)|
+特別|とくべつ|khusus, spesial (kata sifat-na)|
+していらっしゃいます|していらっしゃいます|melakukan (Kata Hormat dari しています)|
+水泳|すいえい|renang|🏊
+違います|ちがいます|salah, tidak benar|
+使っていらっしゃるんですね|つかっていらっしゃるんですね|Menggunakan 〜, ya./Memakai 〜, ya. (Kata Hormat dari つかっているんですね)|
+チャレンジします|チャレンジします|menantang|
+気持ち|きもち|sikap|
+乗り物|のりもの|kendaraan|🚗
+〜世紀|〜せいき|abad ke 〜|
+遠く|とおく|jauh|
+珍しい|めずらしい|langka|
+汽車|きしゃ|kereta api|🚂
+汽船|きせん|kapal api|🚢
+大勢の〜|おおぜいの〜|banyak 〜|
+運びます|はこびます|mengangkut|
+利用します|りようします|menggunakan|
+自由に|じゆうに|dengan bebas|`,
+37:`褒めます|ほめます|memuji|
+しかります|しかります|memarahi|
+誘います|さそいます|mengajak|
+招待します|しょうたいします|mengundang|
+頼みます|たのみます|meminta|
+注意します|ちゅういします|menasihati|
+とります|とります|mencuri|
+踏みます|ふみます|menginjak|
+壊します|こわします|merusak|
+汚します|よごします|mengotori|
+行います|おこないます|mengadakan|
+輸出します|ゆしゅつします|mengekspor|
+輸入します|ゆにゅうします|mengimpor|
+翻訳します|ほんやくします|menerjemahkan|
+発明します|はつめいします|menciptakan|
+発見します|はっけんします|menemukan|
+米|こめ|beras|🍚
+麦|むぎ|gandum|🌾
+石油|せきゆ|minyak tanah|🛢️
+原料|げんりょう|bahan baku|
+インスタントラーメン|インスタントラーメン|mie instan|🍜
+デート|デート|kencan|💑
+泥棒|どろぼう|pencuri|🦹
+警官|けいかん|polisi|👮
+世界中|せかいじゅう|seluruh dunia|🌎
+〜中|〜じゅう|seluruh 〜|
+〜世紀|〜せいき|abad ke 〜|
+何語|なにご|bahasa apa|
+だれか|だれか|siapa|
+よかったですね|よかったですね|Bagus, ya.|
+皆様|みなさま|semuanya (Kata Hormat dari みなさん)|
+焼けます|やけます|terbakar (うちが〜: rumah)|
+その後|そのご|setelah, sudah|
+世界遺産|せかいいさん|Situs Warisan Dunia UNESCO|
+〜の一つ|〜のひとつ|salah satu 〜|
+金色|きんいろ|warna emas|
+本物|ほんもの|asli|
+金|きん|emas|🥇
+〜キロ|〜キロ|〜 kilogram, 〜 kilometer|
+美しい|うつくしい|indah, elok|
+豪華|ごうか|mewah (kata sifat-na)|
+彫刻|ちょうこく|ukiran, pahatan|
+言い伝え|いいつたえ|tradisi|
+眠ります|ねむります|tidur|😴
+彫ります|ほります|mengukir, memahat|
+仲間|なかま|teman|
+しかし|しかし|tetapi|
+そのあと|そのあと|setelah itu, sesudah itu|
+一生懸命|いっしょうけんめい|sungguh-sungguh|
+ねずみ|ねずみ|tikus|🐭
+一匹もいません|いっぴきもいません|Tidak ada seekor pun.|`,
+38:`参加します|さんかします|mengikuti (旅行に〜: perjalanan)|
+育てます|そだてます|memelihara|
+運びます|はこびます|mengangkut|
+入院します|にゅういんします|opname|🏥
+退院します|たいいんします|keluar dari rumah sakit|
+入れます|いれます|menghidupkan (電源を〜: power suply)|
+切ります|きります|mematikan (電源を〜: power suply)|
+掛けます|かけます|mengunci (かぎを〜)|🔒
+つきます|つきます|berbohong (うそを〜)|
+気持ちがいい|きもちがいい|rasa enak|
+気持ちが悪い|きもちがわるい|rasa tidak enak, jijik|
+大きな〜|おおきな〜|besar 〜|
+小さな〜|ちいさな〜|kecil 〜|
+赤ちゃん|あかちゃん|bayi|👶
+小学校|しょうがっこう|SD|🏫
+中学校|ちゅうがっこう|SMP|🏫
+駅前|えきまえ|depan stasiun|
+海岸|かいがん|pantai laut|🏖️
+工場|こうじょう|pabrik|🏭
+村|むら|desa, kampung|
+かな|かな|huruf Hiragana, huruf Katakana|
+指輪|ゆびわ|cincin|💍
+電源|でんげん|power suply|🔌
+習慣|しゅうかん|kebiasaan|
+健康|けんこう|kesehatan|
+〜製|〜せい|buatan 〜|
+おととし|おととし|dua tahun yang lalu|
+あ、いけない|あ、いけない|Ah, salah! (memakai ketika bersalah atau gagal)|
+お先に失礼します|おさきにしつれいします|[Permisi] duluan.|
+回覧|かいらん|edaran|
+研究室|けんきゅうしつ|labolatorium/ruang dosen|
+きちんと|きちんと|dengan rapi|
+整理します|せいりします|mengatur|
+方法|ほうほう|cara|
+〜という|〜という|dengan judul 〜|
+〜冊|〜さつ|〜 buah (kata bantu bilangan untuk menghitung buku dan lain-lain)|
+はんこ|はんこ|cap|
+押します|おします|mengecap (はんこを〜)|
+双子|ふたご|anak kembar|👯
+姉妹|しまい|saudara perempuan|
+5年生|ごねんせい|kelas lima|
+似ています|にています|mirip|
+性格|せいかく|sifat|
+おとなしい|おとなしい|pendiam|
+優しい|やさしい|baik hati|
+世話をします|せわをします|merawat|
+時間がたちます|じかんがたちます|waktu berlalu|
+大好き|だいすき|suka sekali (kata sifat-na)|
+〜点|〜てん|〜 point|
+気が強い|きがつよい|bersifat keras, galak|
+けんかします|けんかします|bertengkar|
+不思議|ふしぎ|aneh (kata sifat-na)|
+年齢|ねんれい|usia, umur|
+しかた|しかた|cara|`,
+39:`答えます|こたえます|menjawab (質問に〜: pada pertanyaan)|
+倒れます|たおれます|roboh (ビルが〜: bangunan)|
+通ります|とおります|lewat, melalui (道を〜: jalan)|
+死にます|しにます|meninggal dunia|
+びっくりします|びっくりします|kaget|
+がっかりします|がっかりします|putus asa|
+安心します|あんしんします|lega|
+けんかします|けんかします|bertengkar|
+離婚します|りこんします|bercerai|
+太ります|ふとります|menjadi gemuk|
+やせます|やせます|menjadi kurus|
+複雑|ふくざつ|rumit (kata sifat-na)|
+邪魔|じゃま|gangguan (kata sifat-na)|
+硬い|かたい|keras|
+軟らかい|やわらかい|lembut|
+汚い|きたない|kotor|
+うれしい|うれしい|senang|
+悲しい|かなしい|sedih|
+恥ずかしい|はずかしい|malu|
+首相|しゅしょう|perdana menteri|
+地震|じしん|gempa bumi|
+津波|つなみ|tsunami|🌊
+台風|たいふう|angin topan|🌀
+雷|かみなり|petir|⚡
+火事|かじ|kebakaran|🔥
+事故|じこ|kecelakaan|💥
+ハイキング|ハイキング|hiking|🥾
+お見合い|おみあい|perjodohan|
+操作|そうさ|operasi (〜します: mengoperasi)|
+会場|かいじょう|tempat|
+〜代|〜だい|biaya untuk 〜|
+〜屋|〜や|penjual 〜|
+フロント|フロント|resepsionis|
+〜号室|〜ごうしつ|kamar nomor 〜|
+タオル|タオル|handuk|
+せっけん|せっけん|sabun|🧼
+大勢|おおぜい|banyak|
+お疲れさまでした|おつかれさまでした|Terima kasih atas kerja samanya. (perkataan terhadap rekan atau bawahan untuk menghargai tenaga kerja mereka)|
+伺います|うかがいます|pergi (Kata Merendahkan Diri dari いきます)|
+途中で|とちゅうで|di tengah|
+トラック|トラック|truk|🚚
+ぶつかります|ぶつかります|menabrak|
+大人|おとな|orang dewasa|
+しかし|しかし|tetapi|
+また|また|dan|
+洋服|ようふく|baju|👗
+西洋化します|せいようかします|kebarat-baratan|
+合います|あいます|cocok|
+今では|いまでは|sekarang|
+成人式|せいじんしき|upacara pendewasaan|
+伝統的|でんとうてき|secara tradisional (kata sifat-na)|`,
+40:`数えます|かぞえます|menghitung|
+測ります|はかります|mengukur, menimbang (測ります、量ります)|
+確かめます|たしかめます|mengecek|
+合います|あいます|cocok (サイズが〜: ukurannya)|
+出発します|しゅっぱつします|berangkat|
+到着します|とうちゃくします|tiba|
+酔います|よいます|mabuk|
+うまくいきます|うまくいきます|berhasil dengan baik|
+出ます|でます|diberikan (問題が〜: soal di ujian)|
+相談します|そうだんします|berkonsultasi|
+必要|ひつよう|perlu (kata sifat-na)|
+天気予報|てんきよほう|prakiraan cuaca|🌤️
+忘年会|ぼうねんかい|pesta akhir tahun|
+新年会|しんねんかい|pesta tahun baru|
+二次会|にじかい|pesta untuk kedua kalinya|
+発表会|はっぴょうかい|mempresentasi|
+大会|たいかい|lomba|
+マラソン|マラソン|maraton|🏃
+コンテスト|コンテスト|pertandingan|
+表|おもて|muka|
+裏|うら|belakang|
+まちがい|まちがい|kesalahan|
+傷|きず|cacat, luka|
+ズボン|ズボン|celana|👖
+お年寄り|おとしより|orang lanjut usia|
+長さ|ながさ|panjangnya|
+重さ|おもさ|beratnya|
+高さ|たかさ|tingginya|
+大きさ|おおきさ|besarnya|
+〜瓶|〜びん|〜 botol|🍾
+〜個|〜こ|〜 buah (kata bantu bilangan untuk menghitung benda kecil)|
+〜本|〜ほん|〜 batang (kata bantu bilangan untuk menghitung benda yang kurus panjang) (〜ぽん、〜ぼん)|
+〜杯|〜はい|〜 cangkir, 〜 gelas (kata bantu bilangan untuk menghitung isi cangkir atau gelas dan lain-lain) (〜ぱい、〜ばい)|
+〜センチ|〜センチ|〜 senti|
+〜ミリ|〜ミリ|〜 mili|
+〜グラム|〜グラム|〜 gram|
+〜以上|〜いじょう|ke atas 〜|
+〜以下|〜いか|ke bawah 〜|
+どうでしょうか|どうでしょうか|Bagaimana? (Kata Sopan dari どうですか)|
+テスト|テスト|ujian|📝
+成績|せいせき|nilai|
+ところで|ところで|ngomong-ngomong|
+いらっしゃいます|いらっしゃいます|datang (Kata Hormat dari きます)|
+様子|ようす|kondisi, suasana|
+事件|じけん|kejadian|
+オートバイ|オートバイ|sepeda motor|🏍️
+爆弾|ばくだん|bom|💣
+積みます|つみます|memuatkan|
+運転手|うんてんしゅ|sopir|
+離れた|はなれた|terpisah|
+急に|きゅうに|mendadak, tiba-tiba|
+動かします|うごかします|menggerakkan|
+一生懸命|いっしょうけんめい|sungguh-sungguh|
+犯人|はんにん|pelaku|
+男|おとこ|laki-laki|
+手に入れます|てにいれます|mendapatkan|
+今でも|いまでも|sampai sekarang|`};
 const EXTRA22=new Set("洋服 シャツ ズボン スカート 靴 靴下 ネクタイ 手袋 マフラー 着物 指輪 時計 台所 玄関 洋室 畳 風呂 トイレ 窓 引っ越し".split(" "));
 const ALL=[];
 Object.keys(D).forEach(c=>D[c].split("\n").forEach(l=>{const p=l.split("|");ALL.push({ch:+c,jp:p[0],k:p[1],id:p[2],e:p[3]||"",x:+c===22&&EXTRA22.has(p[0])})}));
@@ -1437,6 +1934,7 @@ function menu(){
  <button ${nk>=4?"":"disabled"} onclick="startQ('reading')">📖 Kanji Reading Quiz<small>Lihat kanji, pilih cara bacanya (${nk} kanji)</small></button>
  <button ${ne>=4?"":"disabled"} onclick="startQ('picture')">🖼️ Picture Meaning Quiz<small>Lihat gambar, pilih kata Jepang yang tepat (${ne} gambar)</small></button>
  <button onclick="startQ('mixed')">🎲 Mixed Memory Test<small>Campuran arti, cara baca kanji, dan gambar</small></button>
+ <button onclick="mwSetup()">⌨️ Manual Writing Quiz<small>Tulis jawaban Bahasa Jepang secara manual. Latih Hiragana, Katakana, Kanji, dan Romaji.</small></button>
  </div>`);
 }
 /* Flashcard */
@@ -1673,6 +2171,405 @@ const QS=[
 {id:"q2",n:"Siswa Baru",d:"Jawab benar 15 soal kuis + kunjungi Taman",max:16,p:()=>Math.min(G.cnt.quiz||0,15)+(G.cnt.v_a_garden?1:0),coin:100,xp:20,u:"a_school"},
 {id:"q3",n:"Anak Populer",d:"40 jawaban benar, 20 kartu hafal, duduk 5x",max:65,p:()=>Math.min(G.cnt.quiz||0,40)+Math.min(known.size,20)+Math.min(G.cnt.sit||0,5),coin:200,xp:40,u:"a_social"}];
 const _pk=pick;pick=function(i){const q=Q[qi],was=done;_pk(i);if(!was&&q&&q.o[i]===q.c){G.cnt.quiz=(G.cnt.quiz||0)+1;addXP(1)}};
+/* ===== MANUAL WRITING QUIZ ===== */
+/* Memakai L (materi bab aktif), earn(), addXP(), G, gs(), R(), menu(), title() yang sudah ada. */
+const MW_HIRA="ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔ";
+const mwK2H=s=>s.replace(/[\u30a1-\u30f6]/g,c=>String.fromCharCode(c.charCodeAt(0)-96));
+const mwH2K=s=>s.replace(/[\u3041-\u3096]/g,c=>String.fromCharCode(c.charCodeAt(0)+96));
+const mwVOW={"あ":"あ","い":"い","う":"う","え":"え","お":"お","ぁ":"あ","ぃ":"い","ぅ":"う","ぇ":"え","ぉ":"お","ゃ":"あ","ゅ":"う","ょ":"お"};
+const mwVL={"あ":"あ","か":"あ","が":"あ","さ":"あ","ざ":"あ","た":"あ","だ":"あ","な":"あ","は":"あ","ば":"あ","ぱ":"あ","ま":"あ","や":"あ","ら":"あ","わ":"あ","ゎ":"あ",
+"い":"い","き":"い","ぎ":"い","し":"い","じ":"い","ち":"い","ぢ":"い","に":"い","ひ":"い","び":"い","ぴ":"い","み":"い","り":"い","ゐ":"い",
+"う":"う","く":"う","ぐ":"う","す":"う","ず":"う","つ":"う","づ":"う","ぬ":"う","ふ":"う","ぶ":"う","ぷ":"う","む":"う","ゆ":"う","る":"う","ゔ":"う",
+"え":"え","け":"え","げ":"え","せ":"え","ぜ":"え","て":"え","で":"え","ね":"え","へ":"え","べ":"え","ぺ":"え","め":"え","れ":"え","ゑ":"え",
+"お":"お","こ":"お","ご":"お","そ":"お","ぞ":"お","と":"お","ど":"お","の":"お","ほ":"お","ぼ":"お","ぽ":"お","も":"お","よ":"お","ろ":"お","を":"お"};
+/* hiragana murni, ー diperpanjang menjadi huruf vokal, tanda baca & 〜 dibuang */
+function mwKana(s){
+ s=mwK2H(String(s).normalize("NFKC")).replace(/[\s〜~・、。，．,.！？!?「」『』（）()\[\]…‥:：;；"'“”’]/g,"");
+ let o="";
+ for(const c of s){
+  if(c==="ー"||c==="-"){
+   const p=o[o.length-1];
+   const v=p&&(mwVOW[p]||mwVL[p]);
+   if(!v)return null;
+   o+=v;
+  }else o+=c;
+ }
+ return o;
+}
+const mwIsKana=s=>!!s&&[...s].every(c=>MW_HIRA.includes(c));
+/* ---- Hiragana -> Romaji (Hepburn) untuk tampilan ---- */
+const MW_R={"あ":"a","い":"i","う":"u","え":"e","お":"o","か":"ka","き":"ki","く":"ku","け":"ke","こ":"ko","が":"ga","ぎ":"gi","ぐ":"gu","げ":"ge","ご":"go","さ":"sa","し":"shi","す":"su","せ":"se","そ":"so","ざ":"za","じ":"ji","ず":"zu","ぜ":"ze","ぞ":"zo","た":"ta","ち":"chi","つ":"tsu","て":"te","と":"to","だ":"da","ぢ":"ji","づ":"zu","で":"de","ど":"do","な":"na","に":"ni","ぬ":"nu","ね":"ne","の":"no","は":"ha","ひ":"hi","ふ":"fu","へ":"he","ほ":"ho","ば":"ba","び":"bi","ぶ":"bu","べ":"be","ぼ":"bo","ぱ":"pa","ぴ":"pi","ぷ":"pu","ぺ":"pe","ぽ":"po","ま":"ma","み":"mi","む":"mu","め":"me","も":"mo","や":"ya","ゆ":"yu","よ":"yo","ら":"ra","り":"ri","る":"ru","れ":"re","ろ":"ro","わ":"wa","ゐ":"i","ゑ":"e","を":"wo","ゔ":"vu","ゎ":"wa"};
+const MW_SMV={"ぁ":"a","ぃ":"i","ぅ":"u","ぇ":"e","ぉ":"o"};
+const MW_SMY={"ゃ":"a","ゅ":"u","ょ":"o"};
+function mwRomaji(k){
+ const h=mwKana(k);if(!h)return"";
+ const syl=[];
+ for(let i=0;i<h.length;i++){
+  const c=h[i],n=h[i+1];
+  if(c==="っ"){syl.push("*");continue}
+  if(c==="ん"){syl.push("N");continue}
+  let r=MW_R[c];if(!r)return"";
+  if(n&&MW_SMY[n]){
+   const v=MW_SMY[n];
+   r=/^(shi|chi|ji)$/.test(r)?r.slice(0,-1)+v:r.slice(0,-1)+"y"+v;i++;
+  }else if(n&&MW_SMV[n]){
+   const v=MW_SMV[n];
+   r=c==="う"?"w"+v:r.slice(0,-1)+v;i++;
+  }
+  syl.push(r);
+ }
+ let o="";
+ for(let i=0;i<syl.length;i++){
+  const s=syl[i],nx=syl[i+1];
+  if(s==="*"){
+   if(nx&&nx!=="N"&&nx!=="*")o+=nx.startsWith("ch")?"t":nx[0];
+  }else if(s==="N"){
+   o+=nx&&/^[aiueoy]/.test(nx)?"n'":"n";
+  }else o+=s;
+ }
+ return o;
+}
+/* ---- Romaji -> kemungkinan kana (hiragana) ---- */
+const MW_T={};
+(function(){
+ const add=(r,k)=>{(MW_T[r]=MW_T[r]||[]).push(k)};
+ const rows={
+  "":"あいうえお",k:"かきくけこ",g:"がぎぐげご",s:"さしすせそ",z:"ざじずぜぞ",t:"たちつてと",d:"だぢづでど",n:"なにぬねの",h:"はひふへほ",b:"ばびぶべぼ",p:"ぱぴぷぺぽ",m:"まみむめも",r:"らりるれろ"
+ };
+ for(const c in rows){[..."aiueo"].forEach((v,i)=>add(c+v,rows[c][i]))}
+ add("ya","や");add("yu","ゆ");add("yo","よ");add("wa","わ");add("wo","を");add("wi","うぃ");add("we","うぇ");
+ add("shi","し");add("sha","しゃ");add("shu","しゅ");add("sho","しょ");add("she","しぇ");
+ add("chi","ち");add("cha","ちゃ");add("chu","ちゅ");add("cho","ちょ");add("che","ちぇ");
+ add("tsu","つ");add("tsa","つぁ");add("tsi","つぃ");add("tse","つぇ");add("tso","つぉ");
+ add("fu","ふ");add("fa","ふぁ");add("fi","ふぃ");add("fe","ふぇ");add("fo","ふぉ");add("fyu","ふゅ");
+ add("ji","じ");add("ja","じゃ");add("ju","じゅ");add("jo","じょ");add("je","じぇ");
+ add("jya","じゃ");add("jyu","じゅ");add("jyo","じょ");
+ add("ti","てぃ");add("tu","とぅ");add("di","でぃ");add("du","どぅ");
+ add("thi","てぃ");add("thu","てゅ");add("dhi","でぃ");add("dhu","でゅ");add("twu","とぅ");add("dwu","どぅ");
+ const ys={k:"き",g:"ぎ",s:"し",z:"じ",t:"ち",d:"ぢ",n:"に",h:"ひ",b:"び",p:"ぴ",m:"み",r:"り"};
+ const sm={a:"ゃ",u:"ゅ",o:"ょ"};
+ for(const c in ys)for(const v in sm)add(c+"y"+v,ys[c]+sm[v]);
+ for(const v in sm)add("cy"+v,"ち"+sm[v]);
+ add("va","ゔぁ");add("vi","ゔぃ");add("vu","ゔ");add("ve","ゔぇ");add("vo","ゔぉ");
+ [..."aiueo"].forEach((v,i)=>{add("x"+v,"ぁぃぅぇぉ"[i]);add("l"+v,"ぁぃぅぇぉ"[i])});
+ ["ya","yu","yo"].forEach((y,i)=>{add("x"+y,"ゃゅょ"[i]);add("l"+y,"ゃゅょ"[i])});
+ add("xwa","ゎ");add("lwa","ゎ");
+ ["xtu","xtsu","ltu","ltsu"].forEach(r=>add(r,"っ"));
+})();
+delete MW_T[""];
+const MW_VOWC=/[aiueo]/,MW_CONS=/[bcdfghjklmnpqrstvwxyz]/;
+function mwParse(s){
+ const memo={};
+ function go(i){
+  if(i>=s.length)return[""];
+  if(memo[i])return memo[i];
+  const out=new Set(),c=s[i],add=(len,ks)=>{
+   for(const t of go(i+len))for(const k of ks)if(out.size<64)out.add(k+t)
+  };
+  if(c==="n"){
+   const n=s[i+1],n2=s[i+2];
+   if(n==="'"){add(2,["ん"])}
+   else if(n==="n"){
+    if(n2&&(MW_VOWC.test(n2)||n2==="y"))add(1,["ん"]);
+    else add(2,["ん"]);
+   }else if(!n||!(MW_VOWC.test(n)||n==="y")){add(1,["ん"])}
+  }
+  /* konsonan rangkap -> っ */
+  if(c===s[i+1]&&MW_CONS.test(c)&&c!=="n")add(1,["っ"]);
+  if(c==="t"&&s.startsWith("ch",i+1))add(1,["っ"]);
+  for(const L of [4,3,2,1]){
+   const sub=s.substr(i,L);
+   if(sub.length===L&&MW_T[sub])add(L,MW_T[sub]);
+  }
+  return memo[i]=[...out];
+ }
+ return go(0);
+}
+/* normalisasi khusus jalur romaji: perbedaan romaji yang bukan kesalahan baca */
+const mwRN=k=>k.replace(/を/g,"お").replace(/ぢ/g,"じ").replace(/づ/g,"ず").replace(/ゐ/g,"い").replace(/ゑ/g,"え");
+/* jawaban romaji pengguna -> himpunan kana ternormalisasi */
+function mwUserRomaji(raw){
+ let s=String(raw).normalize("NFKC").toLowerCase().replace(/[\s〜~・、。，．,.！？!?「」『』（）()\[\]…:;"“”’]/g,"");
+ if(!s||/[^a-z'\-āīūēō]/.test(s))return null;
+ /* makron: ō bisa oo atau ou, ē bisa ee atau ei */
+ let vs=[s];
+ const mac={"ā":["aa"],"ī":["ii"],"ū":["uu"],"ē":["ee","ei"],"ō":["oo","ou"]};
+ for(const m in mac){
+  const nx=[];
+  for(const v of vs){
+   if(!v.includes(m)){nx.push(v);continue}
+   if(nx.length+mac[m].length>8)continue;
+   for(const r of mac[m])nx.push(v.split(m).join(r));
+  }
+  vs=nx;
+ }
+ const res=new Set();
+ for(const v of vs){
+  /* "-" dipakai seperti ー */
+  const seg=v.split("-");
+  let parts=[""];
+  let ok=true;
+  for(let i=0;i<seg.length;i++){
+   const ps=seg[i]===""?[""]:mwParse(seg[i]);
+   if(!ps.length){ok=false;break}
+   const np=[];
+   for(const a of parts)for(const b of ps)if(np.length<64)np.push(a+b+(i<seg.length-1?"ー":""));
+   parts=np;
+  }
+  if(!ok)continue;
+  for(const p of parts){const k=mwKana(p);if(k)res.add(mwRN(k))}
+ }
+ return res.size?res:null;
+}
+/* variasi pengucapan partikel (は dibaca wa, を dibaca o) yang sah pada romaji */
+function mwRomajiKeys(kana){
+ const k=mwKana(kana);if(!k)return[];
+ const s=new Set([mwRN(k)]);
+ const wa=k.replace(/(こんにち|こんばん)は/g,"$1わ").replace(/(では|には|とは)$/,m=>m.slice(0,-1)+"わ");
+ if(wa!==k)s.add(mwRN(wa));
+ return[...s];
+}
+/* ---- Jenis tulisan ---- */
+const mwHasKanji=s=>/[\u4e00-\u9faf々]/.test(s);
+const mwNonJp=s=>/[A-Za-z0-9０-９]/.test(s);
+const mwPure=s=>s.replace(/[〜~・、。！？!?…\s]/g,"");
+const mwOnlyHira=s=>{const t=mwPure(s);return !!t&&/^[\u3041-\u3096ー]+$/.test(t)&&/[\u3041-\u3096]/.test(t)};
+const mwOnlyKata=s=>{const t=mwPure(s);return !!t&&/^[\u30a1-\u30f6ー]+$/.test(t)&&/[\u30a1-\u30f6]/.test(t)};
+const mwScript=s=>{
+ const t=String(s).normalize("NFKC").replace(/[\s〜~・、。，．,.！？!?「」『』（）()\[\]…:;"“”’]/g,"");
+ const h=/[\u3041-\u3096]/.test(t),k=/[\u30a1-\u30f6]/.test(t);
+ return h&&k?"mix":h?"h":k?"k":"-";
+};
+/* ---- Pembuatan soal ---- */
+const MW_DIR_NAME={A:"Hiragana → tulis",B:"Katakana → tulis",C:"Kanji → tulis",D:"Romaji → Kana",E:"Arti → Bahasa Jepang"};
+const MW_MODE_NAME={romaji:"Romaji",hira:"Hiragana",kata:"Katakana",bebas:"Bebas"};
+const mwWM=()=>MW_MODE_NAME[G.set&&G.set.wm]?G.set.wm:"bebas";
+const mwWN=()=>[5,10,20,30,0].includes(G.set&&G.set.wn)?G.set.wn:10;
+const mwWD=()=>["campur","baca","kana","arti"].includes(G.set&&G.set.wd)?G.set.wd:"campur";
+/* valid: bacaan harus bisa diubah menjadi kana murni */
+function mwWordOK(w){if(/[\[\]…]/.test(w.jp+w.k)||!w.id)return false;const k=mwKana(w.k);return !!k&&mwIsKana(k)}
+/* representasi jawaban yang dibolehkan untuk satu kata sesuai mode */
+function mwForms(w,mode,allowKanji){
+ const k=mwKana(w.k);
+ return{
+  romaji:(mode==="romaji"||mode==="bebas")?mwRomajiKeys(w.k):[],
+  hira:(mode==="hira"||mode==="bebas")?[k]:[],
+  kata:(mode==="kata"||mode==="bebas")?[k]:[],
+  jp:allowKanji&&(mwHasKanji(w.jp)||mwScript(w.jp)!=="-")?[mwKana(w.jp)||"",w.jp.replace(/[\s〜~]/g,"")].filter(Boolean):[]
+ };
+}
+function mwBuild(dir,w,mode,pool){
+ const kana=mwKana(w.k);
+ let q,hint,note="",forms,fmtA;
+ const rom=mwRomaji(w.k);
+ const modeTxt={romaji:"Romaji",hira:"Hiragana",kata:"Katakana",bebas:"Romaji / Hiragana / Katakana"}[mode];
+ if(dir==="A"||dir==="B"||dir==="C"){
+  q=w.jp;
+  const own=dir==="A"?"hira":dir==="B"?"kata":null;
+  forms=mwForms(w,mode,false);
+  if(own)forms[own]=[];/* tidak boleh menyalin soal */
+  if(!(forms.romaji.length||forms.hira.length||forms.kata.length))return null;
+  if(dir==="A"&&mode==="hira")return null;
+  if(dir==="B"&&mode==="kata")return null;
+  const opt=[];
+  if(forms.romaji.length)opt.push("Romaji");
+  if(forms.hira.length)opt.push("Hiragana");
+  if(forms.kata.length)opt.push("Katakana");
+  hint=(dir==="C"?"Tulis cara bacanya dalam ":"Tulis dalam ")+opt.join(" atau ");
+ }else if(dir==="D"){
+  if(mode==="romaji")return null;
+  if(!rom)return null;
+  q=rom.replace(/'/g,"’");
+  forms={romaji:[],hira:(mode==="hira"||mode==="bebas")?[kana]:[],kata:(mode==="kata"||mode==="bebas")?[kana]:[],jp:[]};
+  hint="Tulis dalam "+(mode==="hira"?"Hiragana":mode==="kata"?"Katakana":"Hiragana atau Katakana");
+  note=w.id;
+ }else{/* E */
+  q=w.id;
+  const same=pool.filter(x=>x.id.trim().toLowerCase()===w.id.trim().toLowerCase()&&mwWordOK(x));
+  forms={romaji:[],hira:[],kata:[],jp:[]};
+  for(const x of same){
+   const f=mwForms(x,mode,true);
+   for(const t in f)forms[t]=forms[t].concat(f[t]);
+  }
+  hint="Tulis dalam bahasa Jepang ("+(mode==="bebas"?"Kanji / Hiragana / Katakana / Romaji":mode==="romaji"?"Romaji":mode==="hira"?"Hiragana":"Katakana")+")";
+ }
+ fmtA=w.jp===w.k?w.jp:w.jp+"（"+w.k+"）";
+ return{dir,w,q,hint,note,forms,kana,rom,jp:w.jp,id:w.id,disp:fmtA,mode,emo:w.e||""};
+}
+function mwMake(w,mode,dirSet,pool){
+ const jp=w.jp,sc=mwScript(jp);
+ const c=[];
+ const show=!mwNonJp(jp);
+ if(dirSet.includes("baca")&&show){
+  if(mwHasKanji(jp))c.push("C");
+  else if(mwOnlyHira(jp))c.push("A");
+  else if(mwOnlyKata(jp))c.push("B");
+ }
+ if(dirSet.includes("kana"))c.push("D");
+ if(dirSet.includes("arti"))c.push("E");
+ for(const d of shuf(c)){const q=mwBuild(d,w,mode,pool);if(q)return q}
+ return null;
+}
+function mwStart(){
+ const mode=mwWM(),wd=mwWD();
+ const dirSet=wd==="campur"?["baca","kana","arti"]:[wd];
+ const poolW=L.filter(mwWordOK);
+ const wn=mwWN(),N=wn?Math.min(wn,poolW.length):poolW.length;
+ const Q=[],seen=new Set();
+ for(const w of shuf(poolW)){
+  const k=w.jp+"|"+w.k;if(seen.has(k))continue;
+  const q=mwMake(w,mode,dirSet,poolW);
+  if(q){Q.push(q);seen.add(k)}
+  if(Q.length>=N)break;
+ }
+ if(!Q.length){toast("Materi bab ini belum cocok dengan pilihan mode. Coba ganti mode.");return mwSetup()}
+ MW={Q,i:0,sc:0,wr:0,rec:[],st:"ask",mode,paid:0};
+ mwDraw();
+}
+/* ---- Pemeriksaan jawaban ---- */
+function mwJudge(q,raw){
+ const t=String(raw).normalize("NFKC").trim();
+ if(!t)return{r:"empty"};
+ const compact=t.replace(/[\s〜~]/g,"");
+ /* menyalin soal bukan jawaban */
+ if(q.dir==="D"){if(compact.toLowerCase()===q.q.replace(/[\s’']/g,"").toLowerCase())return{r:"copy"}}
+ else if(q.dir!=="E"&&compact===q.jp.replace(/[\s〜~]/g,""))return{r:"copy"};
+ if(q.forms.jp.some(x=>x&&x===compact))return{r:"ok"};
+ const sc=mwScript(t);
+ if(/^[\x00-\x7f]+$/.test(t)||/[āīūēō]/.test(t)){
+  /* romaji */
+  const set=mwUserRomaji(t);
+  if(!set)return{r:"wrong",m:"Itu bukan romaji Jepang yang valid (contoh penulisan: gakkou)."};
+  const keys=q.forms.romaji;
+  if(!keys.length)return{r:"wrong",m:q.mode==="hira"?"Pada mode ini jawaban harus Hiragana.":q.mode==="kata"?"Pada mode ini jawaban harus Katakana.":""};
+  for(const k of keys)if(set.has(k))return{r:"ok"};
+  return{r:"wrong"};
+ }
+ if(mwHasKanji(t)){
+  const ok=q.forms.jp.some(x=>x&&x===compact);
+  return ok?{r:"ok"}:{r:"wrong",m:q.forms.jp.length?"":"Jawaban Kanji tidak diminta di soal ini."};
+ }
+ if(sc==="mix"){
+  /* campuran hiragana-katakana: hanya sah jika sama persis dengan bentuk tulis kata (soal Arti→Jepang) */
+  if(q.forms.jp.some(x=>x&&x===compact))return{r:"ok"};
+  return{r:"wrong",m:"Gunakan satu jenis tulisan saja (Hiragana saja atau Katakana saja)."};
+ }
+ const k=mwKana(t);
+ if(!k||!mwIsKana(k))return{r:"wrong",m:"Ada karakter yang tidak dikenali. Pakai Romaji, Hiragana, atau Katakana."};
+ if(q.forms.jp.some(x=>x&&x===compact))return{r:"ok"};
+ if(sc==="h"){
+  if(!q.forms.hira.length)return{r:"wrong",m:q.mode==="kata"?"Pada mode ini jawaban harus Katakana.":q.mode==="romaji"?"Pada mode ini jawaban harus Romaji.":""};
+  /* tulisan harus benar-benar hiragana (ー boleh) */
+  return q.forms.hira.includes(k)?{r:"ok"}:{r:"wrong"};
+ }
+ if(sc==="k"){
+  if(!q.forms.kata.length)return{r:"wrong",m:q.mode==="hira"?"Pada mode ini jawaban harus Hiragana.":q.mode==="romaji"?"Pada mode ini jawaban harus Romaji.":""};
+  return q.forms.kata.includes(k)?{r:"ok"}:{r:"wrong"};
+ }
+ /* hanya ー / tanpa huruf kana */
+ return{r:"wrong"};
+}
+/* ---- Tampilan ---- */
+let MW={Q:[],i:0,sc:0,wr:0,rec:[],st:"ask",mode:"bebas",paid:0};
+const mwBack=()=>`<button class="back" onclick="menu()">← Kembali ke menu ${title()}</button>`;
+function mwSetup(){
+ const m=mwWM(),d=mwWD();
+ const mb=(k,t,s)=>`<button class="${m===k?"pri":""}" onclick="mwSet('wm','${k}')">${t}${s?`<small>${s}</small>`:""}</button>`;
+ const db=(k,t)=>`<button class="${d===k?"pri":""}" onclick="mwSet('wd','${k}')">${t}</button>`;
+ const nW=L.filter(mwWordOK).length,wn=mwWN();
+ const nb=[5,10,20,30,0].map(v=>`<button class="${wn===v?"pri":""}" onclick="mwSet('wn',${v})">${v||"Semua"}</button>`).join("");
+ R(`${mwBack()}<h2>⌨️ Manual Writing Quiz</h2><p class="sm c">${title()} · ${nW} kata dari materi bab ini</p>
+ <div class="card" style="min-height:0;padding:16px;align-items:stretch;gap:10px;cursor:default;text-align:left">
+ <b style="color:#e0207f">Mode jawaban</b>
+ <div class="mwg">${mb("romaji","Romaji")}${mb("hira","Hiragana")}${mb("kata","Katakana")}${mb("bebas","Bebas")}</div>
+ <small class="sm">${{romaji:"Jawaban ditulis dalam Romaji.",hira:"Jawaban ditulis dalam Hiragana.",kata:"Jawaban ditulis dalam Katakana.",bebas:"Romaji, Hiragana, atau Katakana yang benar semuanya diterima."}[m]}</small>
+ <b style="color:#e0207f;margin-top:6px">Jenis soal</b>
+ <div class="mwg">${db("campur","Campur")}${db("baca","Tulis bacaan")}${db("kana","Romaji → Kana")}${db("arti","Arti → Jepang")}</div>
+ <b style="color:#e0207f;margin-top:6px">Jumlah soal</b>
+ <div class="mwg" style="grid-template-columns:repeat(5,1fr)">${nb}</div>
+ <small class="sm">${wn?"Maksimal "+wn+" soal":"Semua kata"} (tersedia ${nW} kata di bab ini).</small>
+ </div>
+ <button class="pri" style="width:100%;margin-top:14px" onclick="mwStart()">Mulai kuis</button>`);
+}
+function mwSet(k,v){G.set=G.set||{};G.set[k]=v;gs();mwSetup()}
+function mwDraw(){
+ const q=MW.Q[MW.i];
+ if(!q)return mwEnd();
+ MW.st="ask";MW.t0=Date.now();
+ const pct=MW.i/MW.Q.length*100;
+ R(`${mwBack()}
+ <div class="info"><span>Soal ${MW.i+1} / ${MW.Q.length}</span><span>Skor: ${MW.sc}</span></div>
+ <i class="bar"><u style="width:${pct}%"></u></i>
+ <p class="sm c" style="margin:8px 0 0"><b>${title()} – MANUAL WRITING QUIZ</b><br>Mode: ${MW_DIR_NAME[q.dir]} · Jawaban: ${MW_MODE_NAME[MW.mode]}</p>
+ <div class="card" style="min-height:170px;cursor:default;margin-top:10px">
+  <div class="sm">${q.dir==="E"?"Apa bahasa Jepangnya?":q.dir==="D"?"Tulis dalam huruf Jepang":"Pertanyaan"}</div>
+  ${q.emo&&q.dir==="E"?`<div class="emo" style="font-size:44px">${q.emo}</div>`:""}
+  <div class="${q.dir==="E"||q.dir==="D"?"mwq2":"jp"}">${esc(q.q)}</div>
+ </div>
+ <p class="sm c" style="margin:12px 0 6px">${esc(q.hint)}</p>
+ <input id="mwin" class="mwin" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="Ketik jawaban di sini..." aria-label="Jawaban">
+ <button id="mwck" class="pri" style="width:100%;margin-top:10px" onclick="mwCheck()">PERIKSA JAWABAN</button>
+ <div class="fb" id="mwfb"></div>
+ <button id="mwnx" class="pri" style="width:100%;display:none" onclick="mwNext()">${MW.i+1>=MW.Q.length?"Lihat hasil →":"Soal Berikutnya →"}</button>`);
+ const inp=$("mwin");
+ let comp=0,ce=0;
+ inp.addEventListener("compositionstart",()=>{comp=1});
+ inp.addEventListener("compositionend",()=>{comp=0;ce=Date.now()});
+ inp.addEventListener("keydown",e=>{
+  if(e.key!=="Enter")return;
+  /* Enter untuk konfirmasi konversi IME Jepang tidak boleh mengirim jawaban */
+  if(e.isComposing||e.keyCode===229||comp||Date.now()-ce<60)return;
+  e.preventDefault();
+  MW.st==="ask"?mwCheck():mwNext();
+ });
+ try{inp.focus({preventScroll:true})}catch(e){}
+}
+function mwCheck(){
+ if(MW.st!=="ask")return;
+ const q=MW.Q[MW.i],inp=$("mwin"),raw=inp.value;
+ const j=mwJudge(q,raw);
+ const fb=$("mwfb");
+ if(j.r==="empty"){fb.innerHTML="<b style='color:var(--no)'>Isi jawabanmu dulu ya.</b>";inp.focus();return}
+ if(j.r==="copy"){fb.innerHTML="<b style='color:var(--no)'>Jangan menyalin soal. Tulis dalam bentuk lain sesuai petunjuk.</b>";inp.focus();return}
+ if(j.r==="bad"){fb.innerHTML="<b style='color:var(--no)'>"+esc(j.m)+"</b>";inp.focus();return}
+ MW.st="done";
+ const ok=j.r==="ok";
+ inp.readOnly=true;inp.classList.add(ok?"mwok":"mwno");
+ $("mwck").style.display="none";
+ if(ok){
+  MW.sc++;
+  const a=earn(2);
+  G.cnt.quiz=(G.cnt.quiz||0)+1;G.cnt.wq=(G.cnt.wq||0)+1;
+  addXP(1);
+  toast(a?"+"+a+" 🪙":"Batas sawit harian tercapai");
+ }else MW.wr++;
+ MW.rec.push({q:q.q,dir:q.dir,mine:raw.trim(),ok,disp:q.disp,kana:q.kana,rom:q.rom,id:q.id});
+ let h=ok?"<b style='color:var(--ok)'>Hai, seikai, mantap! ✨</b>":"<b style='color:var(--no)'>Salah.</b>"+(j.m?"<br><small>"+esc(j.m)+"</small>":"");
+ h+=`<div class="mwans">${q.jp===q.w.k?esc(q.jp):esc(q.jp)+" ("+esc(q.w.k)+")"}<br>Romaji: <b>${esc(q.rom)}</b><br>Arti: ${esc(q.id)}</div>`;
+ fb.innerHTML=h;
+ const nx=$("mwnx");nx.style.display="block";
+ /* biarkan keyboard tetap terbuka untuk Enter berikutnya */
+ try{inp.blur();nx.focus({preventScroll:true})}catch(e){}
+}
+function mwNext(){if(MW.st!=="done")return;MW.i++;mwDraw()}
+function mwEnd(){
+ const n=MW.Q.length,acc=n?Math.round(MW.sc/n*100):0;
+ if(n&&!MW.paid){
+  MW.paid=1;
+  const b=MW.sc===n?10:MW.sc>=n*.8?5:0,a=b?earn(b):0;
+  MW.bonus=a;
+ }
+ const rec=MW.rec.map((r,i)=>`<div class="mwr ${r.ok?"ok":"no"}"><b>${i+1}. ${esc(r.q)}</b> <span>${r.ok?"✓":"✗"}</span><br>Jawabanmu: ${esc(r.mine)||"—"}${r.ok?"":`<br>Seharusnya: ${esc(r.disp)} · ${esc(r.rom)}`}<br><small>${esc(r.id)}</small></div>`).join("");
+ R(`${mwBack()}<h2>⌨️ Manual Writing Quiz</h2>
+ <div class="card" style="min-height:190px;cursor:default"><div class="sm">Hasil kamu</div><div class="big">${MW.sc} / ${n}</div>
+ <div class="sm">Benar: <b>${MW.sc}</b> · Salah: <b>${MW.wr}</b> · Akurasi: <b>${acc}%</b></div>
+ <i class="bar" style="width:100%;margin-top:8px"><u style="width:${acc}%"></u></i>
+ <div class="sm" style="margin-top:6px">${acc>=80?"Bagus sekali!":acc>=50?"Lumayan, ulangi lagi ya.":"Ayo belajar flashcard dulu."}</div></div>
+ <p class="sm c" style="margin-top:10px">Bonus skor: +${MW.bonus||0} 🪙 · Sawit hari ini ${G.got}/${CAP}</p>
+ <div class="row"><button class="pri" onclick="mwStart()">Ulangi kuis</button><button onclick="mwSetup()">Ganti mode</button></div>
+ <p class="sm" style="margin:14px 0 6px"><b>Rekap jawaban</b></p><div class="mwrec">${rec}</div>`);
+ hud();
+}
 /* layar nama & pengaturan */
 function nameScreen(){R(`<div class="hero"><h1 class="ttl">Buat Karakter<small>Selamat datang!</small></h1></div><div class="card" style="min-height:0;padding:18px;align-items:stretch;gap:10px"><label class="sm">Nama karaktermu (maks. 12 huruf)</label><input id="nn" maxlength="12" placeholder="Contoh: Haru"><button class="pri" onclick="saveName('nn',1)">Simpan Nama</button><p class="sm">Beli karakter &amp; room di Toko. Nama muncul di atas kepala karakter.</p></div>`);hud()}
 function saveName(id,first){const v=$(id).value.trim().slice(0,12);if(!v){toast("Nama tidak boleh kosong");return}G.name=v;if(!G.q.q1){G.q.q1=1;G.un.a_garden=1;addXP(10)}gs();toast("Nama disimpan ✓");first?home():settings()}
